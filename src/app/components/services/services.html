@@ -1,0 +1,45 @@
+<section class="services-section" id="servicios">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">✦ Nuestros servicios</span>
+      <h2>Todo lo que necesitas<br><span>en un solo lugar</span></h2>
+      <p>Soluciones integrales para el mantenimiento y reparación de tus electrodomésticos con garantía respaldada.</p>
+    </div>
+
+    <div class="services-layout">
+      <div class="services-list">
+        @for (service of services; track service.title; let i = $index) {
+          <div
+            class="service-item"
+            [ngClass]="getClasses(i, service.color)"
+            (click)="setActive(i)">
+            <span class="svc-icon">{{ service.icon }}</span>
+            <span class="svc-title">{{ service.title }}</span>
+            <svg class="arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </div>
+        }
+      </div>
+
+      <div class="service-detail">
+        <div class="detail-icon {{ services[activeIndex].color }}">
+          {{ services[activeIndex].icon }}
+        </div>
+        <h3>{{ services[activeIndex].title }}</h3>
+        <p>{{ services[activeIndex].desc }}</p>
+
+        <ul class="detail-list">
+          @for (item of services[activeIndex].items; track item) {
+            <li>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--brand-blue)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+              {{ item }}
+            </li>
+          }
+        </ul>
+
+        <a href="https://wa.me/573001234567" target="_blank" class="btn btn-primary">
+          Solicitar este servicio →
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
