@@ -1,16 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { SiteDataService } from '../../services/site-data';
 
 @Component({
   selector: 'app-hero',
-  standalone: true,
   templateUrl: './hero.html',
   styleUrl: './hero.scss'
 })
 export class HeroComponent {
-  stats = [
-    { value: '+500', label: 'Clientes atendidos' },
-    { value: '24/7', label: 'Disponibilidad' },
-    { value: '8+', label: 'Años de experiencia' },
-    { value: '100%', label: 'Garantía de servicio' },
-  ];
+  siteData = inject(SiteDataService);
+  hero = this.siteData.data().hero;
+
+  get stats() { return this.siteData.data().hero.stats; }
 }

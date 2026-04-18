@@ -1,10 +1,10 @@
 import { Component, HostListener, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-navbar',
-  standalone: true,
-  imports: [NgClass],
+  imports: [NgClass, RouterLink],
   templateUrl: './navbar.html',
   styleUrl: './navbar.scss'
 })
@@ -13,20 +13,16 @@ export class NavbarComponent {
   menuOpen = signal(false);
 
   navLinks = [
-    { label: 'Inicio', href: '#inicio' },
+    { label: 'Inicio',    href: '#inicio' },
     { label: 'Servicios', href: '#servicios' },
-    { label: 'Proceso', href: '#proceso' },
-    { label: 'Contacto', href: '#contacto' },
+    { label: 'Proceso',   href: '#proceso' },
+    { label: 'Contacto',  href: '#formulario' },
   ];
 
   @HostListener('window:scroll')
-  onScroll() {
-    this.scrolled.set(window.scrollY > 40);
-  }
+  onScroll() { this.scrolled.set(window.scrollY > 40); }
 
-  toggleMenu() {
-    this.menuOpen.update(v => !v);
-  }
+  toggleMenu() { this.menuOpen.update(v => !v); }
 
   scrollTo(href: string) {
     const el = document.querySelector(href);
