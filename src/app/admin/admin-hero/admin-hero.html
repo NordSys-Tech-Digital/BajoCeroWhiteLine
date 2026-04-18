@@ -1,0 +1,50 @@
+<div class="admin-form-page" [formGroup]="form">
+  <div class="form-section">
+    <h4>Texto del Hero</h4>
+    <div class="field-grid">
+      <div class="field full">
+        <label>Badge / Etiqueta superior</label>
+        <input type="text" formControlName="badge" placeholder="✦ Servicio técnico certificado">
+      </div>
+      <div class="field">
+        <label>Headline (primera línea)</label>
+        <input type="text" formControlName="headline" placeholder="Especialistas en">
+      </div>
+      <div class="field">
+        <label>Highlight (palabra azul)</label>
+        <input type="text" formControlName="headlineHighlight" placeholder="aires acondicionados">
+      </div>
+      <div class="field full">
+        <label>Subtexto descriptivo</label>
+        <textarea formControlName="subtext" rows="3"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <div class="section-head">
+      <h4>Estadísticas (tarjetas del hero)</h4>
+      <button type="button" class="add-btn" (click)="addStat()">+ Agregar</button>
+    </div>
+    <div class="stats-grid" formArrayName="stats">
+      @for (ctrl of statsArray.controls; track $index; let i = $index) {
+        <div class="stat-row" [formGroupName]="i">
+          <div class="field">
+            <label>Valor</label>
+            <input type="text" formControlName="value" placeholder="+500">
+          </div>
+          <div class="field">
+            <label>Etiqueta</label>
+            <input type="text" formControlName="label" placeholder="Clientes atendidos">
+          </div>
+          <button type="button" class="remove-btn" (click)="removeStat(i)">✕</button>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="save-bar">
+    @if (saved) { <span class="saved-msg">✅ Cambios guardados</span> }
+    <button class="btn btn-primary" (click)="save()">Guardar cambios</button>
+  </div>
+</div>

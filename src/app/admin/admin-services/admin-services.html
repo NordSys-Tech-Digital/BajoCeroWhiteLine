@@ -1,0 +1,102 @@
+<div class="admin-section">
+  <div class="section-actions">
+    <p class="hint">{{ services.length }} servicios en total · haz clic en uno para editarlo</p>
+    <button class="btn btn-primary" (click)="openNew()">+ Agregar servicio</button>
+  </div>
+
+  <!-- NEW FORM -->
+  @if (showNewForm()) {
+    <div class="edit-card new-card">
+      <h4>Nuevo servicio</h4>
+      <form [formGroup]="newForm">
+        <ng-container *ngTemplateOutlet="serviceFormFields; context: { form: newForm }"></ng-container>
+      </form>
+      <div class="form-actions">
+        <button class="btn btn-outline" (click)="cancelNew()">Cancelar</button>
+        <button class="btn btn-primary" (click)="saveNew()">Guardar servicio</button>
+      </div>
+    </div>
+  }
+
+  <!-- SERVICE LIST -->
+  <div class="services-list">
+    @for (s of services; track s.id) {
+      <div class="service-row" [ngClass]="{ editing: editingId() === s.id, inactive: !s.active }">
+        @if (editingId() === s.id) {
+          <div class="edit-inner">
+            <form [formGroup]="editForm">
+              <ng-container *ngTemplateOutlet="serviceFormFields; context: { form: editForm }"></ng-container>
+            </form>
+            <div class="form-actions">
+              <button class="btn btn-outline" (click)="cancelEdit()">Cancelar</button>
+              <button class="btn btn-primary" (click)="saveEdit(s.id)">Guardar cambios</button>
+            </div>
+          </div>
+        } @else {
+          <div class="row-preview">
+            <span class="svc-icon">{{ s.icon }}</span>
+            <div class="svc-info">
+              <strong>{{ s.title }}</strong>
+              <span>{{ s.desc | slice:0:80 }}...</span>
+            </div>
+            <div class="svc-badges">
+              <span class="color-badge" [ngClass]="s.color">{{ s.color }}</span>
+              <span class="status-badge" [ngClass]="s.active ? 'on' : 'off'">
+                {{ s.active ? 'Activo' : 'Inactivo' }}
+              </span>
+            </div>
+            <div class="row-actions">
+              <button class="icon-btn" title="Editar" (click)="startEdit(s)">✏️</button>
+              <button class="icon-btn" [title]="s.active ? 'Desactivar' : 'Activar'" (click)="toggleActive(s.id)">
+                {{ s.active ? '🔴' : '🟢' }}
+              </button>
+              <button class="icon-btn danger" title="Eliminar" (click)="deleteService(s.id)">🗑️</button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>
+
+<!-- REUSABLE FORM TEMPLATE -->
+<ng-template #serviceFormFields let-form="form">
+  <div class="form-grid" [formGroup]="form">
+    <div class="field">
+      <label>Ícono</label>
+      <div class="icon-picker">
+        @for (ic of icons; track ic) {
+          <button type="button" class="icon-opt" [ngClass]="{ selected: form.get('icon')?.value === ic }" (click)="form.get('icon')?.setValue(ic)">{{ ic }}</button>
+        }
+      </div>
+    </div>
+    <div class="field">
+      <label>Color</label>
+      <div class="color-picker">
+        @for (c of colors; track c) {
+          <button type="button" class="color-opt" [ngClass]="[c, form.get('color')?.value === c ? 'selected' : '']" (click)="form.get('color')?.setValue(c)">{{ c }}</button>
+        }
+      </div>
+    </div>
+    <div class="field full">
+      <label>Título *</label>
+      <input type="text" formControlName="title" placeholder="Nombre del servicio">
+    </div>
+    <div class="field full">
+      <label>Descripción *</label>
+      <textarea formControlName="desc" rows="2" placeholder="Descripción breve del servicio"></textarea>
+    </div>
+    <div class="field full">
+      <label>Items de la lista</label>
+      <div class="items-list" formArrayName="items">
+        @for (ctrl of getItems(form).controls; track $index; let i = $index) {
+          <div class="item-row">
+            <input type="text" [formControlName]="i" placeholder="Item {{ i + 1 }}">
+            <button type="button" class="icon-btn danger sm" (click)="removeItem(form, i)">✕</button>
+          </div>
+        }
+        <button type="button" class="add-item-btn" (click)="addItem(form)">+ Agregar item</button>
+      </div>
+    </div>
+  </div>
+</ng-template>

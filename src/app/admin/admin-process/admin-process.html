@@ -1,0 +1,71 @@
+<div class="admin-section">
+  <div class="section-actions">
+    <p class="hint">{{ steps.length }} pasos configurados</p>
+    <button class="btn btn-primary" (click)="openNew()">+ Agregar paso</button>
+  </div>
+
+  @if (showNew()) {
+    <div class="edit-card">
+      <h4>Nuevo paso</h4>
+      <ng-container *ngTemplateOutlet="stepForm; context: { form: newForm }"></ng-container>
+      <div class="form-actions">
+        <button class="btn btn-outline" (click)="cancelNew()">Cancelar</button>
+        <button class="btn btn-primary" (click)="saveNew()">Guardar</button>
+      </div>
+    </div>
+  }
+
+  <div class="steps-list">
+    @for (step of steps; track step.id) {
+      <div class="step-row" [class.editing]="editingId() === step.id">
+        @if (editingId() === step.id) {
+          <div class="edit-inner">
+            <ng-container *ngTemplateOutlet="stepForm; context: { form: editForm }"></ng-container>
+            <div class="form-actions">
+              <button class="btn btn-outline" (click)="cancelEdit()">Cancelar</button>
+              <button class="btn btn-primary" (click)="saveEdit(step.id)">Guardar</button>
+            </div>
+          </div>
+        } @else {
+          <div class="step-preview">
+            <span class="step-num-badge">{{ step.num }}</span>
+            <span class="step-icon">{{ step.icon }}</span>
+            <div class="step-info">
+              <strong>{{ step.title }}</strong>
+              <span>{{ step.desc }}</span>
+            </div>
+            <div class="row-actions">
+              <button class="icon-btn" (click)="startEdit(step)">✏️</button>
+              <button class="icon-btn danger" (click)="deleteStep(step.id)">🗑️</button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>
+
+<ng-template #stepForm let-form="form">
+  <div class="form-grid" [formGroup]="form">
+    <div class="field">
+      <label>Número (ej: 01)</label>
+      <input type="text" formControlName="num" placeholder="01">
+    </div>
+    <div class="field">
+      <label>Ícono</label>
+      <div class="icon-picker">
+        @for (ic of icons; track ic) {
+          <button type="button" class="icon-opt" [class.selected]="form.get('icon')?.value === ic" (click)="form.get('icon')?.setValue(ic)">{{ ic }}</button>
+        }
+      </div>
+    </div>
+    <div class="field full">
+      <label>Título *</label>
+      <input type="text" formControlName="title" placeholder="Nombre del paso">
+    </div>
+    <div class="field full">
+      <label>Descripción *</label>
+      <textarea formControlName="desc" rows="2" placeholder="Descripción del paso"></textarea>
+    </div>
+  </div>
+</ng-template>

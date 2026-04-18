@@ -1,0 +1,121 @@
+@if (!auth.loggedIn()) {
+  <!-- LOGIN -->
+  <div class="login-page">
+    <div class="login-card">
+      <div class="login-logo">
+        <div class="logo-icon">❄️</div>
+        <h1>CryoTech Admin</h1>
+      </div>
+      <p class="login-sub">Panel de administración</p>
+      <form [formGroup]="loginForm" (ngSubmit)="login()">
+        <div class="login-field">
+          <label>Usuario</label>
+          <input type="text" formControlName="user" placeholder="admin" autocomplete="username">
+        </div>
+        <div class="login-field">
+          <label>Contraseña</label>
+          <input type="password" formControlName="pass" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        @if (loginError()) {
+          <div class="login-error">{{ loginError() }}</div>
+        }
+        <button type="submit" class="btn btn-primary login-btn">Ingresar</button>
+      </form>
+      <a href="/" class="back-link">← Volver al sitio</a>
+    </div>
+  </div>
+
+} @else {
+  <!-- ADMIN LAYOUT -->
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-icon-sm">❄️</div>
+        <span>CryoTech</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        @for (tab of tabs; track tab.id) {
+          <button
+            class="nav-item"
+            [ngClass]="{ active: activeTab() === tab.id }"
+            (click)="setTab(tab.id)">
+            <span class="nav-icon">{{ tab.icon }}</span>
+            <span class="nav-label">{{ tab.label }}</span>
+            @if (tab.id === 'messages' && unread > 0) {
+              <span class="badge">{{ unread }}</span>
+            }
+          </button>
+        }
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="side-btn" (click)="goToSite()">🌐 Ver sitio</button>
+        <button class="side-btn danger" (click)="resetData()">↩ Restablecer</button>
+        <button class="side-btn logout" (click)="logout()">🚪 Salir</button>
+      </div>
+    </aside>
+
+    <!-- Content -->
+    <main class="admin-content">
+      <div class="content-header">
+        <h2>
+          @switch (activeTab()) {
+            @case ('services') { Gestión de servicios }
+            @case ('hero') { Sección Hero }
+            @case ('process') { Pasos del proceso }
+            @case ('contact') { Datos de contacto }
+            @case ('messages') { Mensajes recibidos }
+          }
+        </h2>
+        <span class="header-hint">Los cambios se guardan automáticamente</span>
+      </div>
+
+      <div class="tab-content">
+        @switch (activeTab()) {
+          @case ('services') { <app-admin-services></app-admin-services> }
+          @case ('hero') { <app-admin-hero></app-admin-hero> }
+          @case ('process') { <app-admin-process></app-admin-process> }
+          @case ('contact') { <app-admin-contact></app-admin-contact> }
+          @case ('messages') {
+            <div class="messages-panel">
+              @if (messages.length === 0) {
+                <div class="empty-state">
+                  <div class="empty-icon">💬</div>
+                  <p>No hay mensajes aún</p>
+                </div>
+              }
+              @for (msg of messages; track msg.id) {
+                <div class="message-card" [ngClass]="{ unread: !msg.read }">
+                  <div class="msg-header">
+                    <div class="msg-info">
+                      <strong>{{ msg.name }}</strong>
+                      <span class="msg-service">{{ msg.service }}</span>
+                    </div>
+                    <div class="msg-meta">
+                      <span class="msg-date">{{ msg.date | date:'dd/MM/yyyy HH:mm' }}</span>
+                      @if (!msg.read) { <span class="unread-dot"></span> }
+                    </div>
+                  </div>
+                  <div class="msg-contacts">
+                    <a [href]="'tel:' + msg.phone">📞 {{ msg.phone }}</a>
+                    @if (msg.email) { <a [href]="'mailto:' + msg.email">✉️ {{ msg.email }}</a> }
+                  </div>
+                  <p class="msg-text">{{ msg.message }}</p>
+                  <div class="msg-actions">
+                    @if (!msg.read) {
+                      <button class="msg-btn" (click)="markRead(msg.id)">Marcar como leído</button>
+                    }
+                    <a [href]="'https://wa.me/57' + msg.phone.replace(/\D/g,'')" target="_blank" class="msg-btn primary">Responder por WhatsApp</a>
+                    <button class="msg-btn danger" (click)="deleteMsg(msg.id)">Eliminar</button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        }
+      </div>
+    </main>
+  </div>
+}

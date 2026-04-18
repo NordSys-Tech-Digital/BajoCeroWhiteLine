@@ -1,0 +1,101 @@
+<section class="contact-section" id="formulario">
+  <div class="container">
+    <div class="contact-grid">
+      <div class="contact-info">
+        <span class="section-tag">✦ Escríbenos</span>
+        <h2>¿Tienes algún problema<br>con tu equipo?</h2>
+        <p>Cuéntanos qué está pasando y un técnico especializado te contactará para darte la mejor solución.</p>
+        <div class="info-items">
+          <div class="info-item">
+            <div class="info-icon">⚡</div>
+            <div>
+              <strong>Respuesta rápida</strong>
+              <span>Te contactamos en menos de 30 minutos</span>
+            </div>
+          </div>
+          <div class="info-item">
+            <div class="info-icon">🛡️</div>
+            <div>
+              <strong>Sin costo de diagnóstico</strong>
+              <span>Evaluamos tu equipo gratis antes de cotizar</span>
+            </div>
+          </div>
+          <div class="info-item">
+            <div class="info-icon">💳</div>
+            <div>
+              <strong>Múltiples formas de pago</strong>
+              <span>Efectivo, transferencia, tarjeta débito/crédito</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-card">
+        @if (!submitted()) {
+          <form [formGroup]="form" (ngSubmit)="onSubmit()">
+            <div class="form-row">
+              <div class="field" [ngClass]="{ error: isInvalid('name') }">
+                <label>Nombre completo *</label>
+                <input type="text" formControlName="name" placeholder="Tu nombre">
+                @if (isInvalid('name')) {
+                  <span class="err-msg">Ingresa tu nombre (mínimo 2 caracteres)</span>
+                }
+              </div>
+              <div class="field" [ngClass]="{ error: isInvalid('phone') }">
+                <label>Teléfono / Celular *</label>
+                <input type="tel" formControlName="phone" placeholder="300 000 0000">
+                @if (isInvalid('phone')) {
+                  <span class="err-msg">Ingresa un número válido</span>
+                }
+              </div>
+            </div>
+
+            <div class="field" [ngClass]="{ error: isInvalid('email') }">
+              <label>Correo electrónico <span class="optional">(opcional)</span></label>
+              <input type="email" formControlName="email" placeholder="tu@correo.com">
+              @if (isInvalid('email')) {
+                <span class="err-msg">Correo inválido</span>
+              }
+            </div>
+
+            <div class="field" [ngClass]="{ error: isInvalid('service') }">
+              <label>Servicio requerido *</label>
+              <select formControlName="service">
+                <option value="" disabled>Selecciona un servicio</option>
+                @for (s of services; track s.id) {
+                  <option [value]="s.title">{{ s.icon }} {{ s.title }}</option>
+                }
+              </select>
+              @if (isInvalid('service')) {
+                <span class="err-msg">Selecciona un servicio</span>
+              }
+            </div>
+
+            <div class="field" [ngClass]="{ error: isInvalid('message') }">
+              <label>Describe el problema *</label>
+              <textarea formControlName="message" rows="4" placeholder="Cuéntanos qué está pasando con tu equipo..."></textarea>
+              @if (isInvalid('message')) {
+                <span class="err-msg">Describe el problema (mínimo 10 caracteres)</span>
+              }
+            </div>
+
+            <button type="submit" class="btn btn-primary submit-btn" [disabled]="sending()">
+              @if (sending()) {
+                <span class="spinner"></span> Enviando...
+              } @else {
+                Enviar solicitud →
+              }
+            </button>
+          </form>
+        } @else {
+          <div class="success-state">
+            <div class="success-icon">✅</div>
+            <h3>¡Mensaje enviado!</h3>
+            <p>Gracias por contactarnos. Un técnico se comunicará contigo en los próximos 30 minutos.</p>
+            <button class="btn btn-outline" (click)="reset()">Enviar otro mensaje</button>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</section>

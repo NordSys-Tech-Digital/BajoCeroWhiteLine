@@ -18,7 +18,7 @@
     </div>
 
     <div class="contact-cards">
-      @for (ch of channels; track ch.label) {
+      @for (ch of channels(); track ch.label) {
         <a [href]="ch.href" target="_blank" class="contact-card">
           <div class="ch-icon-wrap">
             @if (ch.icon === 'whatsapp') {

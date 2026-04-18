@@ -1,33 +1,20 @@
-import { Component } from '@angular/core';
+import { Component, inject, computed } from '@angular/core';
+import { SiteDataService } from '../../services/site-data';
 
 @Component({
   selector: 'app-cta',
-  standalone: true,
   templateUrl: './cta.html',
   styleUrl: './cta.scss'
 })
 export class CtaComponent {
-  channels = [
-    {
-      icon: 'whatsapp',
-      label: 'WhatsApp',
-      value: '+57 300 123 4567',
-      href: 'https://wa.me/573001234567',
-      hint: 'Respuesta inmediata'
-    },
-    {
-      icon: 'phone',
-      label: 'Teléfono',
-      value: '601 123 4567',
-      href: 'tel:+576011234567',
-      hint: 'Lun–Dom · 7am–9pm'
-    },
-    {
-      icon: 'email',
-      label: 'Correo',
-      value: 'info@cryotech.co',
-      href: 'mailto:info@cryotech.co',
-      hint: 'Respuesta en 2h'
-    },
-  ];
+  siteData = inject(SiteDataService);
+
+  channels = computed(() => {
+    const c = this.siteData.data().contact;
+    return [
+      { icon: 'whatsapp', label: 'WhatsApp', value: '+' + c.whatsapp, href: 'https://wa.me/' + c.whatsapp, hint: 'Respuesta inmediata' },
+      { icon: 'phone',    label: 'Teléfono', value: c.phone, href: 'tel:+57' + c.phone, hint: c.schedule },
+      { icon: 'email',    label: 'Correo',   value: c.email, href: 'mailto:' + c.email, hint: 'Respuesta en 2h' },
+    ];
+  });
 }
