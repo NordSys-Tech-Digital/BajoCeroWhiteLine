@@ -1,14 +1,403 @@
-.carousel {
+// ── Variables ─────────────────────────────────────────────────────────────
+$radius: 16px;
+$radius-thumb: 10px;
+$arrow-size: 44px;
+$trans-speed: 0.55s;
+$trans-ease: cubic-bezier(0.4, 0, 0.2, 1);
+$z-slide: 1;
+$z-overlay: 2;
+$z-ui: 10;
+
+// ── Wrapper ───────────────────────────────────────────────────────────────
+.carousel-wrapper {
+	width: 100%;
+	max-width: 1080px;
+	margin: 0 auto 0;
+	padding: 0 0 32px;
+	user-select: none;
+	-webkit-user-select: none;
+
+	&.fullscreen {
+		position: fixed;
+		inset: 0;
+		max-width: 100%;
+		z-index: 9999;
+		background: #000;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		padding: 0;
+
+		.stage {
+			border-radius: 0;
+			height: 100vh;
+			max-height: 100vh;
+		}
+
+		.thumbs {
+			padding: 8px 16px;
+		}
+	}
+}
+
+// ── Stage ─────────────────────────────────────────────────────────────────
+.stage {
+	position: relative;
+	width: 100%;
+	aspect-ratio: 16 / 7;
+	max-height: 520px;
+	border-radius: $radius;
+	overflow: hidden;
+	background: #0a1520;
+	cursor: grab;
+
+	&:active {
+		cursor: grabbing;
+	}
+}
+
+// ── Slides ────────────────────────────────────────────────────────────────
+.slide {
+	position: absolute;
+	inset: 0;
+	z-index: $z-slide;
+	transition: transform $trans-speed $trans-ease,
+		opacity $trans-speed $trans-ease;
+
+	img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
+		pointer-events: none;
+		transform: scale(1);
+		transition: transform ($trans-speed * 2) $trans-ease;
+	}
+
+	// States
+	&.active {
+		z-index: 3;
+		transform: translateX(0) scale(1);
+		opacity: 1;
+
+		img {
+			transform: scale(1.02);
+		}
+
+		// Ken Burns subtle zoom
+	}
+
+	&.is-prev {
+		z-index: 2;
+		transform: translateX(-100%);
+		opacity: 0;
+	}
+
+	&.is-next {
+		z-index: 2;
+		transform: translateX(100%);
+		opacity: 0;
+	}
+
+	&.inactive {
+		z-index: 1;
+		transform: translateX(0);
+		opacity: 0;
+		pointer-events: none;
+	}
+}
+
+// ── Caption ───────────────────────────────────────────────────────────────
+.caption {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	z-index: $z-ui;
+	padding: 28px 28px 20px;
+	background: linear-gradient(to top, rgba(0, 0, 0, 0.65) 0%, transparent 100%);
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	pointer-events: none;
+
+	.caption-title {
+		font-family: var(--font-display, 'Syne', sans-serif);
+		font-size: 18px;
+		font-weight: 600;
+		color: white;
+		text-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
+		text-transform: capitalize;
+	}
+
+	.caption-sub {
+		font-size: 13px;
+		color: rgba(255, 255, 255, 0.7);
+	}
+}
+
+// ── Gradient overlays ─────────────────────────────────────────────────────
+.overlay {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	width: 80px;
+	z-index: $z-overlay;
+	pointer-events: none;
+
+	&-left {
+		left: 0;
+		background: linear-gradient(to right, rgba(0, 0, 0, 0.18), transparent);
+	}
+
+	&-right {
+		right: 0;
+		background: linear-gradient(to left, rgba(0, 0, 0, 0.18), transparent);
+	}
+}
+
+// ── Arrows ────────────────────────────────────────────────────────────────
+.arrow {
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+	z-index: $z-ui;
+	width: $arrow-size;
+	height: $arrow-size;
+	border-radius: 50%;
+	border: none;
+	background: rgba(255, 255, 255, 0.14);
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+	color: white;
+	cursor: pointer;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: 1rem;
+	transition: background 0.2s, transform 0.2s, opacity 0.2s;
+	opacity: 0;
+
+	svg {
+		width: 20px;
+		height: 20px;
+	}
+
+	&:hover {
+		background: rgba(255, 255, 255, 0.28);
+		transform: translateY(-50%) scale(1.08);
+	}
+
+	&-left {
+		left: 14px;
+	}
+
+	&-right {
+		right: 14px;
+	}
 }
 
-.carousel-image {
-	width: 500px;
-	height: 300px;
-	object-fit: cover;
-	border-radius: 10px;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+.stage:hover .arrow {
+	opacity: 1;
+}
+
+// ── Top bar ───────────────────────────────────────────────────────────────
+.topbar {
+	position: absolute;
+	top: 14px;
+	right: 14px;
+	z-index: $z-ui;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	opacity: 0;
+	transition: opacity 0.2s;
+}
+
+.stage:hover .topbar {
+	opacity: 1;
+}
+
+.counter {
+	font-size: 12px;
+	font-weight: 600;
+	color: white;
+	background: rgba(0, 0, 0, 0.4);
+	backdrop-filter: blur(6px);
+	padding: 4px 10px;
+	border-radius: 20px;
+	letter-spacing: 0.04em;
+}
+
+.topbar-btn {
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	border: none;
+	background: rgba(0, 0, 0, 0.4);
+	backdrop-filter: blur(6px);
+	color: white;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: background 0.2s;
+
+	svg {
+		width: 15px;
+		height: 15px;
+	}
+
+	&:hover {
+		background: rgba(255, 255, 255, 0.2);
+	}
+}
+
+// ── Progress bar ──────────────────────────────────────────────────────────
+.progress-rail {
+	height: 3px;
+	background: rgba(10, 110, 189, 0.15);
+	border-radius: 0 0 4px 4px;
+	overflow: hidden;
+}
+
+.progress-fill {
+	height: 100%;
+	background: linear-gradient(90deg, #0A6EBD, #00D4FF);
+	border-radius: 0 2px 2px 0;
+	transition: width 0.05s linear;
+}
+
+// ── Dot indicators ────────────────────────────────────────────────────────
+.dots {
+	display: flex;
+	justify-content: center;
+	gap: 8px;
+	padding: 14px 0 12px;
+}
+
+.dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	border: none;
+	background: rgba(10, 110, 189, 0.2);
+	cursor: pointer;
+	transition: all 0.3s ease;
+	padding: 0;
+
+	&.active {
+		width: 24px;
+		border-radius: 4px;
+		background: #0A6EBD;
+	}
+
+	&:hover:not(.active) {
+		background: rgba(10, 110, 189, 0.45);
+	}
+}
+
+// ── Thumbnail strip ───────────────────────────────────────────────────────
+.thumbs {
+	display: flex;
+	gap: 10px;
+	overflow-x: auto;
+	padding: 0 4px 4px;
+	scrollbar-width: thin;
+	scrollbar-color: rgba(10, 110, 189, 0.3) transparent;
+
+	&::-webkit-scrollbar {
+		height: 4px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: rgba(10, 110, 189, 0.3);
+		border-radius: 2px;
+	}
+
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+}
+
+.thumb {
+	position: relative;
+	flex-shrink: 0;
+	width: 80px;
+	height: 52px;
+	border-radius: $radius-thumb;
+	overflow: hidden;
+	border: 2px solid transparent;
+	cursor: pointer;
+	padding: 0;
+	background: #0a1520;
+	transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+
+	img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
+		transition: transform 0.3s ease;
+	}
+
+	.thumb-overlay {
+		position: absolute;
+		inset: 0;
+		background: rgba(0, 0, 0, 0.35);
+		transition: background 0.2s;
+	}
+
+	&.active {
+		border-color: #0A6EBD;
+		box-shadow: 0 0 0 1px rgba(10, 110, 189, 0.4);
+
+		.thumb-overlay {
+			background: transparent;
+		}
+
+		img {
+			transform: scale(1.05);
+		}
+	}
+
+	&:not(.active):hover {
+		transform: translateY(-2px);
+
+		.thumb-overlay {
+			background: rgba(0, 0, 0, 0.1);
+		}
+	}
+}
+
+// ── Responsive ────────────────────────────────────────────────────────────
+@media (max-width: 768px) {
+	.stage {
+		aspect-ratio: 4 / 3;
+		max-height: 320px;
+	}
+
+	.arrow {
+		display: none;
+	}
+
+	.caption .caption-title {
+		font-size: 15px;
+	}
+
+	.thumb {
+		width: 60px;
+		height: 40px;
+	}
+}
+
+@media (max-width: 480px) {
+	.stage {
+		aspect-ratio: 1 / 1;
+		max-height: 300px;
+		border-radius: 12px;
+	}
+
+	.thumbs {
+		display: none;
+	}
 }

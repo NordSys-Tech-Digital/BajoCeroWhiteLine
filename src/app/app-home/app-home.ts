@@ -9,20 +9,23 @@ import { FooterComponent } from '../components/footer/footer';
 import { CarouselComponent } from '../components/carousel/carousel';
 
 @Component({
-  selector: 'app-home',
-  imports: [NavbarComponent, HeroComponent, ServicesComponent, ProcessComponent, ContactFormComponent, CtaComponent, FooterComponent, CarouselComponent],
-  template: `
+	selector: 'app-home',
+	imports: [NavbarComponent, HeroComponent, ServicesComponent, ProcessComponent, ContactFormComponent, CtaComponent, FooterComponent, CarouselComponent],
+	template: `
     <app-navbar></app-navbar>
-    <main>
-      <app-carousel></app-carousel>
-      <app-hero></app-hero>
-      <app-services></app-services>
-      <app-process></app-process>
-      <app-contact-form></app-contact-form>
-      <app-cta></app-cta>
-    </main>
-    <app-footer></app-footer>
+<main>
+  <app-hero></app-hero>
+  <app-services></app-services>
+  <app-process></app-process>
+  <app-carousel
+  [autoplayInterval]="6000"
+  [showThumbnails]="true"
+  [showCaptions]="true"></app-carousel>
+  <app-contact-form></app-contact-form>
+  <app-cta></app-cta>
+</main>
+<app-footer></app-footer>
   `,
-  styles: [`main { overflow: hidden; }`]
+	styles: [`main { overflow: hidden; }`]
 })
-export class AppHomeComponent {}
+export class AppHomeComponent { }
