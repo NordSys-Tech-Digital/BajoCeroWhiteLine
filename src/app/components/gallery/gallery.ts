@@ -9,10 +9,10 @@ import {
 import { NgClass } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import {
-	GalleryImage,
-	GalleryCategory,
-	GALLERY_IMAGES,
-	GALLERY_CATEGORIES,
+  GalleryImage,
+  GalleryCategory,
+  GALLERY_IMAGES,
+  GALLERY_CATEGORIES,
 } from '../../models/gallery.models';
 
 @Component({
