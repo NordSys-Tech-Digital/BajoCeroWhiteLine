@@ -1,32 +1,37 @@
 import { Component, HostListener, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
-  selector: 'app-navbar',
-  imports: [NgClass, RouterLink],
-  templateUrl: './navbar.html',
-  styleUrl: './navbar.scss'
+	selector: 'app-navbar',
+	imports: [NgClass, RouterLink, RouterLinkActive],
+	templateUrl: './navbar.html',
+	styleUrl: './navbar.scss',
 })
 export class NavbarComponent {
-  scrolled = signal(false);
-  menuOpen = signal(false);
+	scrolled = signal(false);
+	menuOpen = signal(false);
 
-  navLinks = [
-    { label: 'Inicio',    href: '#inicio' },
-    { label: 'Servicios', href: '#servicios' },
-    { label: 'Proceso',   href: '#proceso' },
-    { label: 'Contacto',  href: '#formulario' },
-  ];
+	navLinks = [
+		{ label: 'Inicio', routerLink: '/', fragment: 'inicio' },
+		{ label: 'Servicios', routerLink: '/', fragment: 'servicios' },
+		{ label: 'Galería', routerLink: '/galeria', fragment: null },
+		{ label: 'Proceso', routerLink: '/', fragment: 'proceso' },
+		{ label: 'Contacto', routerLink: '/', fragment: 'formulario' },
+	];
 
-  @HostListener('window:scroll')
-  onScroll() { this.scrolled.set(window.scrollY > 40); }
+	@HostListener('window:scroll')
+	onScroll() { this.scrolled.set(window.scrollY > 40); }
 
-  toggleMenu() { this.menuOpen.update(v => !v); }
+	toggleMenu() { this.menuOpen.update(v => !v); }
 
-  scrollTo(href: string) {
-    const el = document.querySelector(href);
-    el?.scrollIntoView({ behavior: 'smooth' });
-    this.menuOpen.set(false);
-  }
+	navigate(link: typeof this.navLinks[0]) {
+		this.menuOpen.set(false);
+		if (link.fragment) {
+			setTimeout(() => {
+				document.getElementById(link.fragment!)
+					?.scrollIntoView({ behavior: 'smooth' });
+			}, 80);
+		}
+	}
 }
