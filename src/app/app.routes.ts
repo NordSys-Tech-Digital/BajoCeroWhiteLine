@@ -9,5 +9,9 @@ export const routes: Routes = [
     path: 'admin',
     loadComponent: () => import('./admin/admin-shell/admin-shell').then(m => m.AdminShellComponent)
   },
+  {
+    path: 'galeria',
+    loadComponent: () => import('./components/gallery/gallery').then(m => m.GalleryComponent)
+  },
   { path: '**', redirectTo: '' }
 ];
