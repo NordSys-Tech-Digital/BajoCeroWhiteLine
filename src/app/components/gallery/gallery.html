@@ -219,7 +219,7 @@
 	<!-- Main image -->
 	<div class="lb-content" (click)="$event.stopPropagation()">
 		<div class="lb-img-wrap">
-			<img [src]="imgSrc(lightboxImage()!.filename)" [alt]="lightboxImage()!.title" />
+			<img [src]="'/' + imgSrc(lightboxImage()!.filename)" [alt]="lightboxImage()!.title" />
 		</div>
 
 		<div class="lb-info">
