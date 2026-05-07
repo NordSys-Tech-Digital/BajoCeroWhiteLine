@@ -373,9 +373,6 @@
 	}
 }
 
-.loaded .gallery-card {
-	/* animation trigger */
-}
 
 @keyframes cardIn {
 	from {
@@ -495,6 +492,7 @@
 	}
 }
 
+// Button base style
 .btn {
 	display: inline-flex;
 	align-items: center;
@@ -510,34 +508,27 @@
 	transition: all 0.2s;
 }
 
+// Button variants (move rarely used to gallery-extras.scss)
+.btn-outline, .btn-white, .btn-outline-white {
+	@extend .btn;
+}
+
 .btn-outline {
 	background: transparent;
 	color: var(--brand-blue, #0A6EBD);
 	border: 1.5px solid var(--brand-blue, #0A6EBD);
-
-	&:hover {
-		background: var(--brand-light, #EBF7FF);
-	}
+	&:hover { background: var(--brand-light, #EBF7FF); }
 }
-
 .btn-white {
 	background: white;
 	color: var(--brand-dark, #06223A);
-
-	&:hover {
-		background: #f0f9ff;
-		transform: translateY(-1px);
-	}
+	&:hover { background: #f0f9ff; transform: translateY(-1px); }
 }
-
 .btn-outline-white {
 	background: transparent;
 	color: rgba(255, 255, 255, 0.85);
 	border: 1.5px solid rgba(255, 255, 255, 0.35);
-
-	&:hover {
-		background: rgba(255, 255, 255, 0.1);
-	}
+	&:hover { background: rgba(255, 255, 255, 0.1); }
 }
 
 // ── CTA Banner ─────────────────────────────────────────────────────────────
