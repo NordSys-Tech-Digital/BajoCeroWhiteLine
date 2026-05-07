@@ -6,7 +6,6 @@ import {
 	computed,
 	HostListener,
 } from '@angular/core';
-import { NgClass } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import {
   GalleryImage,
@@ -17,7 +16,7 @@ import {
 
 @Component({
 	selector: 'app-gallery',
-	imports: [NgClass, RouterLink],
+	imports: [RouterLink],
 	templateUrl: './gallery.html',
 	styleUrl: './gallery.scss',
 })
