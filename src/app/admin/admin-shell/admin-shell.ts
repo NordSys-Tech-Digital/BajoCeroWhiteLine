@@ -6,11 +6,13 @@ import { AdminServicesComponent } from '../admin-services/admin-services';
 import { AdminHeroComponent } from '../admin-hero/admin-hero';
 import { AdminProcessComponent } from '../admin-process/admin-process';
 import { AdminContactComponent } from '../admin-contact/admin-contact';
+import { AdminGalleryComponent } from '../admin-gallery/admin-gallery';
 import { SiteDataService } from '../../services/site-data';
+import { AdminFooterComponent } from '../admin-footer/admin-footer';
 
 @Component({
   selector: 'app-admin-shell',
-  imports: [NgClass, DatePipe, ReactiveFormsModule, AdminServicesComponent, AdminHeroComponent, AdminProcessComponent, AdminContactComponent],
+  imports: [NgClass, DatePipe, ReactiveFormsModule, AdminServicesComponent, AdminHeroComponent, AdminProcessComponent, AdminContactComponent, AdminGalleryComponent, AdminFooterComponent],
   templateUrl: './admin-shell.html',
   styleUrl: './admin-shell.scss'
 })
@@ -19,7 +21,7 @@ export class AdminShellComponent implements OnInit {
   siteData = inject(SiteDataService);
   private fb = inject(FormBuilder);
 
-  activeTab = signal<'services' | 'hero' | 'process' | 'contact' | 'messages'>('services');
+  activeTab = signal<'services' | 'hero' | 'process' | 'gallery' | 'footer' | 'contact' | 'messages'>('services');
   loginError = signal('');
 
   loginForm = this.fb.group({
@@ -42,6 +44,8 @@ export class AdminShellComponent implements OnInit {
     { id: 'services', label: 'Servicios', icon: '🔧' },
     { id: 'hero',     label: 'Hero',      icon: '🏠' },
     { id: 'process',  label: 'Proceso',   icon: '⚡' },
+    { id: 'gallery',  label: 'Galería',   icon: '🖼️' },
+    { id: 'footer',   label: 'Footer',    icon: '📄' },
     { id: 'contact',  label: 'Contacto',  icon: '📞' },
     { id: 'messages', label: 'Mensajes',  icon: '💬' },
   ] as const;

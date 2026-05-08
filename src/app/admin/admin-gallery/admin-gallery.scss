@@ -1,0 +1,41 @@
+.admin-gallery-page {
+  padding: 2rem;
+}
+.gallery-actions {
+  margin-bottom: 1rem;
+}
+.gallery-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.gallery-item {
+  border: 1px solid #eee;
+  padding: 0.5rem;
+  border-radius: 6px;
+  width: 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.gallery-item img {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+.item-info {
+  margin-top: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  align-items: center;
+}
+.btn-sm {
+  font-size: 0.8rem;
+  padding: 0.2rem 0.5rem;
+}
+.error {
+  color: red;
+  margin-top: 1rem;
+}

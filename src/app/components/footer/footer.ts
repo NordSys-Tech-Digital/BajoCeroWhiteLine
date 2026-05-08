@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { FooterDataService } from '../../services/footer-data.service';
 
 @Component({
   selector: 'app-footer',
@@ -7,14 +7,8 @@ import { RouterLink } from '@angular/router';
   styleUrl: './footer.scss'
 })
 export class FooterComponent {
+  data = this.footerData.getData();
   year = new Date().getFullYear();
-
-  links = [
-    { label: 'Servicios', href: '#servicios' },
-    { label: 'Mantenimiento', href: '#servicios' },
-    { label: 'Reparación', href: '#servicios' },
-    { label: 'Instalación', href: '#servicios' },
-    { label: 'Proceso', href: '#proceso' },
-    { label: 'Contacto', href: '#contacto' },
-  ];
+  constructor(private footerData: FooterDataService) {}
+  get links() { return this.data.links; }
 }

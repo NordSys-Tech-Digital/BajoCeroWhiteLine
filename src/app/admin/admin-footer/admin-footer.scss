@@ -1,0 +1,20 @@
+.admin-footer-page {
+  padding: 2rem;
+}
+.footer-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 400px;
+}
+.footer-form label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 500;
+}
+.footer-form input {
+  margin-top: 0.3rem;
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}

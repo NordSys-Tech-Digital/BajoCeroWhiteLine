@@ -1,0 +1,23 @@
+<div class="admin-gallery-page">
+  <h2>Galería de Imágenes</h2>
+  <div class="gallery-actions">
+    <input type="file" accept="image/*" multiple (change)="onFileChange($event)" />
+    <button class="btn btn-primary" [disabled]="uploading()" (click)="uploadImages()">
+      {{ uploading() ? 'Subiendo...' : 'Subir imágenes' }}
+    </button>
+  </div>
+  <div class="gallery-list">
+    @for (img of images(); track img.filename) {
+      <div class="gallery-item">
+        <img [src]="'/assets/img/' + img.filename" [alt]="img.title" />
+        <div class="item-info">
+          <span>{{ img.title }}</span>
+          <button class="btn btn-danger btn-sm" (click)="removeImage(img.filename)">Eliminar</button>
+        </div>
+      </div>
+    }
+  </div>
+  @if(error()) {
+    <div class="error">{{ error() }}</div>
+  }
+</div>
