@@ -1,52 +1,55 @@
 <section class="hero" id="inicio">
-  <div class="blob blob-1"></div>
-  <div class="blob blob-2"></div>
-  <div class="grid-overlay"></div>
-  <div class="container hero-inner">
-    <div class="hero-content">
-      <span class="section-tag">{{ siteData.data().hero.badge }}</span>
-      <h1>
-        {{ siteData.data().hero.headline }}<br>
-        <span class="highlight">{{ siteData.data().hero.headlineHighlight }}</span><br>
-        y línea blanca
-      </h1>
-      <p>{{ siteData.data().hero.subtext }}</p>
-      <div class="hero-btns">
-        <a [href]="'https://wa.me/' + siteData.data().contact.whatsapp" target="_blank" class="btn btn-primary">
-          Solicitar servicio
-        </a>
-        <a [href]="'tel:+57' + siteData.data().contact.phone" class="btn btn-outline">Llamar ahora</a>
-      </div>
-      <div class="trust-badges">
-        <div class="badge">✔ Técnicos certificados</div>
-        <div class="badge">✔ Garantía por escrito</div>
-        <div class="badge">✔ Respuesta en 2 horas</div>
-      </div>
-    </div>
-    <div class="hero-visual">
-      <div class="ac-card">
-        <div class="ac-display">
-          <div class="temp-circle">
-            <div class="snowflake">❄</div>
-            <div class="temp">18°C</div>
-            <div class="temp-label">Temperatura</div>
-          </div>
-          <div class="ac-controls">
-            <div class="control-row"><span class="ctrl-label">Modo</span><span class="ctrl-val cool">Enfriamiento</span></div>
-            <div class="control-row"><span class="ctrl-label">Velocidad</span><span class="ctrl-val">Auto</span></div>
-            <div class="control-row"><span class="ctrl-label">Estado</span><span class="ctrl-val active">● Activo</span></div>
-          </div>
-        </div>
-        <div class="ac-brand-strip"><span>Samsung · LG · Carrier · York · Kalima · Midea</span></div>
-      </div>
-      <div class="stats-grid">
-        @for (stat of stats; track stat.label) {
-          <div class="stat-card">
-            <div class="stat-val">{{ stat.value }}</div>
-            <div class="stat-lbl">{{ stat.label }}</div>
-          </div>
-        }
-      </div>
-    </div>
-  </div>
+	<div class="blob blob-1"></div>
+	<div class="blob blob-2"></div>
+	<div class="grid-overlay"></div>
+	<div class="container hero-inner">
+		<div class="hero-content">
+			<span class="section-tag">{{ siteData.data().hero.badge }}</span>
+			<h1>
+				{{ siteData.data().hero.headline }}<br>
+				<span class="highlight">{{ siteData.data().hero.headlineHighlight }}</span><br>
+				y línea blanca
+			</h1>
+			<p>{{ siteData.data().hero.subtext }}</p>
+			<div class="hero-btns">
+				<a [href]="'https://wa.me/' + siteData.data().contact.whatsapp" target="_blank" class="btn btn-primary">
+					Solicitar servicio
+				</a>
+				<a [href]="'tel:+57' + siteData.data().contact.phone" class="btn btn-outline">Llamar ahora</a>
+			</div>
+			<div class="trust-badges">
+				<div class="badge">✔ Técnicos certificados</div>
+				<div class="badge">✔ Garantía por escrito</div>
+				<div class="badge">✔ Respuesta en 2 horas</div>
+			</div>
+		</div>
+		<div class="hero-visual">
+			<div class="ac-card">
+				<div class="ac-display">
+					<div class="temp-circle">
+						<div class="snowflake">❄</div>
+						<div class="temp">18°C</div>
+						<div class="temp-label">Temperatura</div>
+					</div>
+					<div class="ac-controls">
+						<div class="control-row"><span class="ctrl-label">Modo</span><span
+								class="ctrl-val cool">Enfriamiento</span></div>
+						<div class="control-row"><span class="ctrl-label">Velocidad</span><span
+								class="ctrl-val">Auto</span></div>
+						<div class="control-row"><span class="ctrl-label">Estado</span><span class="ctrl-val active">●
+								Activo</span></div>
+					</div>
+				</div>
+				<div class="ac-brand-strip"><span>Samsung · LG · Carrier · York · Kalima · Midea</span></div>
+			</div>
+			<div class="stats-grid">
+				@for (stat of stats; track stat.label) {
+				<div class="stat-card">
+					<div class="stat-val">{{ stat.value }}</div>
+					<div class="stat-lbl">{{ stat.label }}</div>
+				</div>
+				}
+			</div>
+		</div>
+	</div>
 </section>

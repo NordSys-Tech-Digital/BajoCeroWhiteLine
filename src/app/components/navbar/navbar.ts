@@ -6,7 +6,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 	selector: 'app-navbar',
 	imports: [NgClass, RouterLink, RouterLinkActive],
 	templateUrl: './navbar.html',
-	styleUrl: './navbar.scss',
+	styleUrls: ['./navbar.scss'],
 })
 export class NavbarComponent {
 	scrolled = signal(false);
@@ -23,7 +23,15 @@ export class NavbarComponent {
 	@HostListener('window:scroll')
 	onScroll() { this.scrolled.set(window.scrollY > 40); }
 
-	toggleMenu() { this.menuOpen.update(v => !v); }
+	toggleMenu() {
+		this.menuOpen.update(v => !v);
+
+		// Bloquear scroll del body cuando el menú está abierto
+		setTimeout(() => {
+			document.body.style.overflow = this.menuOpen() ? 'hidden' : '';
+			document.body.classList.toggle('menu-open', this.menuOpen());
+		}, 300); // Esperar a que termine la transición CSS
+	}
 
 	navigate(link: typeof this.navLinks[0]) {
 		this.menuOpen.set(false);
