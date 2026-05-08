@@ -1,44 +1,59 @@
 <div class="admin-form-page" [formGroup]="form">
-  <div class="form-section">
-    <h4>Datos de contacto</h4>
-    <p class="hint">Estos datos aparecen en el navbar, sección CTA y footer del sitio.</p>
-    <div class="field-grid">
-      <div class="field">
-        <label>WhatsApp (solo números, sin +)</label>
-        <input type="text" formControlName="whatsapp" placeholder="573001234567">
-        <span class="field-hint">Ej: 573001234567 (código país + número)</span>
-      </div>
-      <div class="field">
-        <label>Teléfono fijo</label>
-        <input type="text" formControlName="phone" placeholder="6011234567">
-      </div>
-      <div class="field">
-        <label>Correo electrónico</label>
-        <input type="email" formControlName="email" placeholder="info@empresa.co">
-      </div>
-      <div class="field">
-        <label>Ciudad</label>
-        <input type="text" formControlName="city" placeholder="Cali, Colombia">
-      </div>
-      <div class="field full">
-        <label>Horario de atención</label>
-        <input type="text" formControlName="schedule" placeholder="Lun–Dom · 7am–9pm">
-      </div>
-    </div>
-  </div>
+	<div class="form-section">
+		<h4>Datos de contacto</h4>
+		<p class="hint">Estos datos aparecen en el navbar, sección CTA y footer del sitio.</p>
+		<div class="field-grid">
+			<div class="field">
+				<label>
+					<input type="text" [value]="labels.whatsapp" (input)="updateLabel('whatsapp', $event.target.value)" style="width: 120px; margin-right: 8px;" />
+					(clave: whatsapp)
+				</label>
+				<input type="text" formControlName="whatsapp" placeholder="573001234567">
+				<span class="field-hint">Ej: 573001234567 (código país + número)</span>
+			</div>
+			<div class="field">
+				<label>
+					<input type="text" [value]="labels.phone" (input)="updateLabel('phone', $event.target.value)" style="width: 120px; margin-right: 8px;" />
+					(clave: phone)
+				</label>
+				<input type="text" formControlName="phone" placeholder="6011234567">
+			</div>
+			<div class="field">
+				<label>
+					<input type="text" [value]="labels.email" (input)="updateLabel('email', $event.target.value)" style="width: 120px; margin-right: 8px;" />
+					(clave: email)
+				</label>
+				<input type="email" formControlName="email" placeholder="info@empresa.co">
+			</div>
+			<div class="field">
+				<label>
+					<input type="text" [value]="labels.city" (input)="updateLabel('city', $event.target.value)" style="width: 120px; margin-right: 8px;" />
+					(clave: city)
+				</label>
+				<input type="text" formControlName="city" placeholder="Cali, Colombia">
+			</div>
+			<div class="field full">
+				<label>
+					<input type="text" [value]="labels.schedule" (input)="updateLabel('schedule', $event.target.value)" style="width: 120px; margin-right: 8px;" />
+					(clave: schedule)
+				</label>
+				<input type="text" formControlName="schedule" placeholder="Lun–Dom · 7am–9pm">
+			</div>
+		</div>
+	</div>
 
-  <div class="preview-section">
-    <h4>Vista previa</h4>
-    <div class="preview-chips">
-      <span>💬 wa.me/{{ form.get('whatsapp')?.value }}</span>
-      <span>📞 {{ form.get('phone')?.value }}</span>
-      <span>✉️ {{ form.get('email')?.value }}</span>
-      <span>📍 {{ form.get('city')?.value }}</span>
-    </div>
-  </div>
+	<div class="preview-section">
+		<h4>Vista previa</h4>
+		<div class="preview-chips">
+			<span>💬 wa.me/{{ form.get('whatsapp')?.value }}</span>
+			<span>📞 {{ form.get('phone')?.value }}</span>
+			<span>✉️ {{ form.get('email')?.value }}</span>
+			<span>📍 {{ form.get('city')?.value }}</span>
+		</div>
+	</div>
 
-  <div class="save-bar">
-    @if (saved) { <span class="saved-msg">✅ Contacto actualizado</span> }
-    <button class="btn btn-primary" (click)="save()">Guardar cambios</button>
-  </div>
+	<div class="save-bar">
+		@if (saved) { <span class="saved-msg">✅ Contacto actualizado</span> }
+		<button class="btn btn-primary" (click)="save()">Guardar cambios</button>
+	</div>
 </div>

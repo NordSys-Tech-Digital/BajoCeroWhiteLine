@@ -14,4 +14,11 @@ export class AdminFooterComponent {
     this.footerData.setData({ [field]: value });
     this.data = this.footerData.getData();
   }
+
+  updateLinkLabel(index: number, newLabel: string) {
+    const links = [...this.data.links];
+    links[index] = { ...links[index], label: newLabel };
+    this.footerData.setData({ links });
+    this.data = this.footerData.getData();
+  }
 }

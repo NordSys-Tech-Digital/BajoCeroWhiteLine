@@ -11,59 +11,59 @@ import { SiteDataService } from '../../services/site-data';
 import { AdminFooterComponent } from '../admin-footer/admin-footer';
 
 @Component({
-  selector: 'app-admin-shell',
-  imports: [NgClass, DatePipe, ReactiveFormsModule, AdminServicesComponent, AdminHeroComponent, AdminProcessComponent, AdminContactComponent, AdminGalleryComponent, AdminFooterComponent],
-  templateUrl: './admin-shell.html',
-  styleUrl: './admin-shell.scss'
+	selector: 'app-admin-shell',
+	imports: [NgClass, DatePipe, ReactiveFormsModule, AdminServicesComponent, AdminHeroComponent, AdminProcessComponent, AdminContactComponent, AdminGalleryComponent, AdminFooterComponent],
+	templateUrl: './admin-shell.html',
+	styleUrl: './admin-shell.scss'
 })
 export class AdminShellComponent implements OnInit {
-  auth = inject(AuthService);
-  siteData = inject(SiteDataService);
-  private fb = inject(FormBuilder);
+	auth = inject(AuthService);
+	siteData = inject(SiteDataService);
+	private fb = inject(FormBuilder);
 
-  activeTab = signal<'services' | 'hero' | 'process' | 'gallery' | 'footer' | 'contact' | 'messages'>('services');
-  loginError = signal('');
+	activeTab = signal<'services' | 'hero' | 'process' | 'gallery' | 'footer' | 'contact' | 'messages'>('services');
+	loginError = signal('');
 
-  loginForm = this.fb.group({
-    user: ['', Validators.required],
-    pass: ['', Validators.required]
-  });
+	loginForm = this.fb.group({
+		user: ['', Validators.required],
+		pass: ['', Validators.required]
+	});
 
-  ngOnInit() { this.auth.checkSession(); }
+	ngOnInit() { this.auth.checkSession(); }
 
-  login() {
-    const { user, pass } = this.loginForm.value;
-    if (!this.auth.login(user!, pass!)) {
-      this.loginError.set('Usuario o contraseña incorrectos');
-    }
-  }
+	login() {
+		const { user, pass } = this.loginForm.value;
+		if (!this.auth.login(user!, pass!)) {
+			this.loginError.set('Usuario o contraseña incorrectos');
+		}
+	}
 
-  logout() { this.auth.logout(); }
+	logout() { this.auth.logout(); }
 
-  tabs = [
-    { id: 'services', label: 'Servicios', icon: '🔧' },
-    { id: 'hero',     label: 'Hero',      icon: '🏠' },
-    { id: 'process',  label: 'Proceso',   icon: '⚡' },
-    { id: 'gallery',  label: 'Galería',   icon: '🖼️' },
-    { id: 'footer',   label: 'Footer',    icon: '📄' },
-    { id: 'contact',  label: 'Contacto',  icon: '📞' },
-    { id: 'messages', label: 'Mensajes',  icon: '💬' },
-  ] as const;
+	tabs = [
+		{ id: 'services', label: 'Servicios', icon: '🔧' },
+		{ id: 'hero', label: 'Hero', icon: '🏠' },
+		{ id: 'process', label: 'Proceso', icon: '⚡' },
+		{ id: 'gallery', label: 'Galería', icon: '🖼️' },
+		// { id: 'footer',   label: 'Footer',    icon: '📄' },
+		{ id: 'contact', label: 'Contacto', icon: '📞' },
+		{ id: 'messages', label: 'Mensajes', icon: '💬' },
+	] as const;
 
-  setTab(t: typeof this.activeTab extends { set(v: infer T): void } ? T : never) {
-    this.activeTab.set(t);
-  }
+	setTab(t: typeof this.activeTab extends { set(v: infer T): void } ? T : never) {
+		this.activeTab.set(t);
+	}
 
-  get unread() { return this.siteData.unreadCount(); }
-  get messages() { return this.siteData.messages(); }
+	get unread() { return this.siteData.unreadCount(); }
+	get messages() { return this.siteData.messages(); }
 
-  markRead(id: string) { this.siteData.markRead(id); }
-  deleteMsg(id: string) { this.siteData.deleteMessage(id); }
+	markRead(id: string) { this.siteData.markRead(id); }
+	deleteMsg(id: string) { this.siteData.deleteMessage(id); }
 
-  goToSite() { window.open('/', '_blank'); }
-  resetData() {
-    if (confirm('¿Restablecer todos los datos a los valores por defecto?')) {
-      this.siteData.resetToDefaults();
-    }
-  }
+	goToSite() { window.open('/', '_blank'); }
+	resetData() {
+		if (confirm('¿Restablecer todos los datos a los valores por defecto?')) {
+			this.siteData.resetToDefaults();
+		}
+	}
 }
