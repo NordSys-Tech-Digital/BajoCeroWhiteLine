@@ -1,28 +1,40 @@
-import { Injectable, signal } from '@angular/core';
-
-const ADMIN_USER = 'admin';
-const ADMIN_PASS = 'cryotech2025';
+import { Injectable, signal, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { tap, catchError, of } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private http     = inject(HttpClient);
   private _loggedIn = signal(false);
   readonly loggedIn = this._loggedIn.asReadonly();
 
-  login(user: string, pass: string): boolean {
-    if (user === ADMIN_USER && pass === ADMIN_PASS) {
-      this._loggedIn.set(true);
-      sessionStorage.setItem('admin_auth', '1');
-      return true;
-    }
-    return false;
+  login(user: string, password: string) {
+    return this.http
+      .post<{ token?: string; tsec?: string; access_token?: string }>(
+        `${environment.apiUrl}/login`,
+        { user, password }
+      )
+      .pipe(
+        tap(res => {
+          const token = res.token ?? res.tsec ?? res.access_token ?? null;
+          if (token) {
+            sessionStorage.setItem('admin_token', token);
+            this._loggedIn.set(true);
+          }
+        }),
+        catchError(() => of(null))
+      );
   }
 
   logout() {
+    sessionStorage.removeItem('admin_token');
     this._loggedIn.set(false);
-    sessionStorage.removeItem('admin_auth');
   }
 
   checkSession() {
-    if (sessionStorage.getItem('admin_auth')) this._loggedIn.set(true);
+    if (sessionStorage.getItem('admin_token')) {
+      this._loggedIn.set(true);
+    }
   }
 }

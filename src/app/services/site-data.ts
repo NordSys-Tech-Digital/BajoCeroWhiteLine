@@ -1,150 +1,235 @@
-import { Injectable, signal, computed } from '@angular/core';
-import { SiteData, Service, ProcessStep, ContactMessage } from '../models/site.models';
+import { Injectable, signal, computed, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, tap, catchError, of } from 'rxjs';
+import { environment } from '../../environments/environment';
+import {
+  Service,
+  ProcessStep,
+  HeroData,
+  ContactInfo,
+  SiteData,
+  ContactMessage,
+} from '../models/site.models';
 
-const STORAGE_KEY = 'cryotech_site_data';
-const MESSAGES_KEY = 'cryotech_messages';
+const API = environment.apiUrl;
 
-const DEFAULT_DATA: SiteData = {
-	hero: {
-		badge: '✦ Servicio técnico certificado',
-		headline: 'Especialistas en',
-		headlineHighlight: 'aires acondicionados',
-		subtext: 'Instalación, mantenimiento y reparación de electrodomésticos para hogares y empresas. Técnicos certificados con respuesta en menos de 2 horas.',
-		stats: [
-			{ value: '+500', label: 'Clientes atendidos' },
-			{ value: '24/7', label: 'Disponibilidad' },
-			{ value: '8+', label: 'Años de experiencia' },
-			{ value: '100%', label: 'Garantía de servicio' },
-		]
-	},
-	services: [
-		{ id: 's1', icon: '❄️', color: 'blue', active: true, title: 'Mantenimiento aire acondicionado', desc: 'Limpieza de filtros, revisión de gas refrigerante, inspección eléctrica y calibración para máxima eficiencia.', items: ['Limpieza profunda de filtros', 'Revisión de gas refrigerante', 'Inspección de componentes', 'Prueba de funcionamiento'] },
-		{ id: 's2', icon: '🔧', color: 'teal', active: true, title: 'Reparación aire acondicionado', desc: 'Diagnóstico profesional y solución de fallas en equipos split, centralizados y portátiles de todas las marcas.', items: ['Diagnóstico sin costo', 'Cambio de compresor', 'Reparación de fugas', 'Recarga de refrigerante'] },
-		{ id: 's3', icon: '⚡', color: 'amber', active: true, title: 'Instalación', desc: 'Instalación segura y eficiente de aires split, minisplit y sistemas centralizados con acabados profesionales.', items: ['Instalación split y mini-split', 'Canalización eléctrica', 'Tuberías de drenaje', 'Pruebas de presión'] },
-		{ id: 's4', icon: '🧊', color: 'ice', active: true, title: 'Neveras y refrigeración', desc: 'Servicio técnico para neveras residenciales y comerciales, cámaras frías y equipos de refrigeración industrial.', items: ['Limpieza de condensador', 'Cambio de termostato', 'Reparación de compresor', 'Sellado de puertas'] },
-		{ id: 's5', icon: '💧', color: 'blue', active: true, title: 'Calentadores de agua', desc: 'Mantenimiento y reparación de calentadores eléctricos y a gas de todas las marcas y capacidades.', items: ['Revisión de resistencias', 'Limpieza de tanque', 'Cambio de válvulas', 'Ajuste de termostato'] },
-		{ id: 's6', icon: '🫧', color: 'teal', active: true, title: 'Lavadoras y secadoras', desc: 'Reparación especializada en lavadoras de carga frontal y superior, Samsung, LG, Mabe, Whirlpool y más.', items: ['Diagnóstico electrónico', 'Cambio de rodamientos', 'Reparación de bomba', 'Mantenimiento general'] },
-	],
-	steps: [
-		{ id: 'p1', num: '01', icon: '📞', title: 'Solicita el servicio', desc: 'Contáctanos por WhatsApp, teléfono o formulario online. Te respondemos en minutos.' },
-		{ id: 'p2', num: '02', icon: '🔍', title: 'Diagnóstico gratuito', desc: 'Nuestro técnico visita tu hogar o empresa y evalúa el equipo sin costo adicional.' },
-		{ id: 'p3', num: '03', icon: '📋', title: 'Cotización clara', desc: 'Recibes una cotización detallada y transparente. Sin sorpresas ni costos ocultos.' },
-		{ id: 'p4', num: '04', icon: '✅', title: 'Solución garantizada', desc: 'Ejecutamos el servicio con garantía escrita. Tu satisfacción es nuestra prioridad.' },
-	],
-	contact: {
-		whatsapp: '573001234567',
-		phone: '6011234567',
-		email: 'info@cryotech.co',
-		city: 'Cali, Colombia',
-		schedule: 'Lun–Dom · 7am–9pm'
-	}
+// ── Mapeadores: normalizan los campos del backend al modelo del frontend ───────
+
+function toService(r: any): Service {
+  return {
+    id:     r.id     ?? r._id ?? String(Date.now()),
+    icon:   r.icon   ?? '🔧',
+    color:  r.color  ?? 'blue',
+    title:  r.title  ?? '',
+    desc:   r.desc   ?? '',
+    items:  Array.isArray(r.items) ? r.items : [],
+    active: r.active ?? true,
+  };
+}
+
+function toStep(r: any): ProcessStep {
+  return {
+    id:    r.id    ?? r._id ?? String(Date.now()),
+    num:   r.num   ?? '',
+    icon:  r.icon  ?? '📞',
+    title: r.title ?? '',
+    desc:  r.descripcion ?? r.desc ?? '',   // la API usa "descripcion"
+  };
+}
+
+function stepToApi(s: Omit<ProcessStep, 'id'> | ProcessStep) {
+  return { num: s.num, icon: s.icon, title: s.title, descripcion: s.desc };
+}
+
+function toContact(r: any): ContactInfo {
+  const src = Array.isArray(r) ? r[0] : r;
+  return {
+    whatsapp: src?.whatsapp ?? '',
+    phone:    src?.phone    ?? '',
+    email:    src?.email    ?? '',
+    city:     src?.city     ?? '',
+    schedule: src?.schedule ?? '',
+  };
+}
+
+// ── Default hero (no hay endpoint todavía en la API) ─────────────────────────
+
+const DEFAULT_HERO: HeroData = {
+  badge:             '✦ Servicio técnico certificado',
+  headline:          'Especialistas en',
+  headlineHighlight: 'aires acondicionados',
+  subtext:           'Instalación, mantenimiento y reparación de electrodomésticos para hogares y empresas. Técnicos certificados con respuesta en menos de 2 horas.',
+  stats: [
+    { value: '+500', label: 'Clientes atendidos' },
+    { value: '24/7', label: 'Disponibilidad' },
+    { value: '8+',   label: 'Años de experiencia' },
+    { value: '100%', label: 'Garantía de servicio' },
+  ],
 };
+
+// ── Servicio principal ────────────────────────────────────────────────────────
 
 @Injectable({ providedIn: 'root' })
 export class SiteDataService {
-	private _data = signal<SiteData>(this.load());
-	private _messages = signal<ContactMessage[]>(this.loadMessages());
+  private http = inject(HttpClient);
 
-	readonly data = this._data.asReadonly();
-	readonly messages = this._messages.asReadonly();
-	readonly unreadCount = computed(() => this._messages().filter(m => !m.read).length);
-	readonly activeServices = computed(() => this._data().services.filter(s => s.active));
+  // Estado reactivo
+  private _services = signal<Service[]>([]);
+  private _steps    = signal<ProcessStep[]>([]);
+  private _contact  = signal<ContactInfo>({ whatsapp: '', phone: '', email: '', city: '', schedule: '' });
+  private _hero     = signal<HeroData>(DEFAULT_HERO);
+  private _messages = signal<ContactMessage[]>([]);
 
-	private load(): SiteData {
-		try {
-			const raw = localStorage.getItem(STORAGE_KEY);
-			return raw ? { ...DEFAULT_DATA, ...JSON.parse(raw) } : DEFAULT_DATA;
-		} catch { return DEFAULT_DATA; }
-	}
+  // Lectura pública
+  readonly data = computed<SiteData>(() => ({
+    hero:     this._hero(),
+    services: this._services(),
+    steps:    this._steps(),
+    contact:  this._contact(),
+  }));
 
-	private loadMessages(): ContactMessage[] {
-		try {
-			const raw = localStorage.getItem(MESSAGES_KEY);
-			return raw ? JSON.parse(raw) : [];
-		} catch { return []; }
-	}
+  readonly activeServices  = computed(() => this._services().filter(s => s.active));
+  readonly messages        = this._messages.asReadonly();
+  readonly unreadCount     = computed(() => this._messages().filter(m => !m.read).length);
 
-	private save() {
-		localStorage.setItem(STORAGE_KEY, JSON.stringify(this._data()));
-	}
+  // ── Carga inicial ────────────────────────────────────────────────────────────
 
-	private saveMessages() {
-		localStorage.setItem(MESSAGES_KEY, JSON.stringify(this._messages()));
-	}
+  loadAll() {
+    this.loadServices();
+    this.loadSteps();
+    this.loadContact();
+  }
 
-	updateHero(hero: SiteData['hero']) {
-		this._data.update(d => ({ ...d, hero }));
-		this.save();
-	}
+  // ── Servicios ────────────────────────────────────────────────────────────────
+  // GET  /bajo-cero/services
+  // POST /bajo-cero/services         body: { icon, color, title, desc, items[], active }
+  // PUT  /bajo-cero/services/:id     body: mismo
+  // PATCH /bajo-cero/services/:id/toggle
+  // DELETE /bajo-cero/services/:id
 
-	updateContact(contact: SiteData['contact']) {
-		this._data.update(d => ({ ...d, contact }));
-		this.save();
-	}
+  loadServices() {
+    this.http.get<any[]>(`${API}/services`).pipe(
+      catchError(() => of([]))
+    ).subscribe(raw => this._services.set(raw.map(toService)));
+  }
 
-	// Services
-	addService(s: Omit<Service, 'id'>) {
-		const service: Service = { ...s, id: 's' + Date.now() };
-		this._data.update(d => ({ ...d, services: [...d.services, service] }));
-		this.save();
-	}
+  addService(s: Omit<Service, 'id'>): Observable<Service> {
+    return this.http.post<any>(`${API}/services`, s).pipe(
+      tap(raw => {
+        const created = toService(raw);
+        this._services.update(list => [...list, created]);
+      })
+    );
+  }
 
-	updateService(updated: Service) {
-		this._data.update(d => ({ ...d, services: d.services.map(s => s.id === updated.id ? updated : s) }));
-		this.save();
-	}
+  updateService(s: Service): Observable<Service> {
+    return this.http.put<any>(`${API}/services/${s.id}`, s).pipe(
+      tap(raw => {
+        const updated = toService({ ...s, ...raw });
+        this._services.update(list => list.map(x => x.id === s.id ? updated : x));
+      })
+    );
+  }
 
-	deleteService(id: string) {
-		this._data.update(d => ({ ...d, services: d.services.filter(s => s.id !== id) }));
-		this.save();
-	}
+  toggleService(id: string): Observable<any> {
+    return this.http.patch<any>(`${API}/services/${id}/toggle`, {}).pipe(
+      tap(() => this._services.update(list =>
+        list.map(x => x.id === id ? { ...x, active: !x.active } : x)
+      ))
+    );
+  }
 
-	toggleService(id: string) {
-		this._data.update(d => ({ ...d, services: d.services.map(s => s.id === id ? { ...s, active: !s.active } : s) }));
-		this.save();
-	}
+  deleteService(id: string): Observable<any> {
+    return this.http.delete<any>(`${API}/services/${id}`).pipe(
+      tap(() => this._services.update(list => list.filter(x => x.id !== id)))
+    );
+  }
 
-	reorderServices(services: Service[]) {
-		this._data.update(d => ({ ...d, services }));
-		this.save();
-	}
+  // ── Pasos del proceso ────────────────────────────────────────────────────────
+  // GET    /bajo-cero/process-steps
+  // POST   /bajo-cero/process-steps   body: { num, icon, title, descripcion }
+  // PUT    /bajo-cero/process-steps/:id
+  // DELETE /bajo-cero/process-steps/:id
 
-	// Steps
-	addStep(step: Omit<ProcessStep, 'id'>) {
-		const s: ProcessStep = { ...step, id: 'p' + Date.now() };
-		this._data.update(d => ({ ...d, steps: [...d.steps, s] }));
-		this.save();
-	}
+  loadSteps() {
+    this.http.get<any[]>(`${API}/process-steps`).pipe(
+      catchError(() => of([]))
+    ).subscribe(raw => this._steps.set(raw.map(toStep)));
+  }
 
-	updateStep(updated: ProcessStep) {
-		this._data.update(d => ({ ...d, steps: d.steps.map(s => s.id === updated.id ? updated : s) }));
-		this.save();
-	}
+  addStep(s: Omit<ProcessStep, 'id'>): Observable<ProcessStep> {
+    return this.http.post<any>(`${API}/process-steps`, stepToApi(s)).pipe(
+      tap(raw => {
+        const created = toStep({ ...stepToApi(s), ...raw });
+        this._steps.update(list => [...list, created]);
+      })
+    );
+  }
 
-	deleteStep(id: string) {
-		this._data.update(d => ({ ...d, steps: d.steps.filter(s => s.id !== id) }));
-		this.save();
-	}
+  updateStep(s: ProcessStep): Observable<ProcessStep> {
+    return this.http.put<any>(`${API}/process-steps/${s.id}`, stepToApi(s)).pipe(
+      tap(raw => {
+        const updated = toStep({ ...stepToApi(s), ...raw, id: s.id });
+        this._steps.update(list => list.map(x => x.id === s.id ? updated : x));
+      })
+    );
+  }
 
-	// Messages
-	addMessage(msg: Omit<ContactMessage, 'id' | 'date' | 'read'>) {
-		const m: ContactMessage = { ...msg, id: 'm' + Date.now(), date: new Date().toISOString(), read: false };
-		this._messages.update(ms => [m, ...ms]);
-		this.saveMessages();
-	}
+  deleteStep(id: string): Observable<any> {
+    return this.http.delete<any>(`${API}/process-steps/${id}`).pipe(
+      tap(() => this._steps.update(list => list.filter(x => x.id !== id)))
+    );
+  }
 
-	markRead(id: string) {
-		this._messages.update(ms => ms.map(m => m.id === id ? { ...m, read: true } : m));
-		this.saveMessages();
-	}
+  // ── Contacto ─────────────────────────────────────────────────────────────────
+  // GET /bajo-cero/contact
+  // PUT /bajo-cero/contact/    (barra al final tal como está en el Postman)
 
-	deleteMessage(id: string) {
-		this._messages.update(ms => ms.filter(m => m.id !== id));
-		this.saveMessages();
-	}
+  loadContact() {
+    this.http.get<any>(`${API}/contact`).pipe(
+      catchError(() => of(null))
+    ).subscribe(raw => {
+      if (raw) this._contact.set(toContact(raw));
+    });
+  }
 
-	resetToDefaults() {
-		this._data.set(DEFAULT_DATA);
-		this.save();
-	}
+  updateContact(c: ContactInfo): Observable<any> {
+    return this.http.put<any>(`${API}/contact/`, c).pipe(
+      tap(() => this._contact.set(c))
+    );
+  }
+
+  // ── Hero ─────────────────────────────────────────────────────────────────────
+  // No hay endpoint en la API todavía → se guarda en memoria.
+
+  updateHero(hero: HeroData) {
+    this._hero.set(hero);
+  }
+
+  // ── Mensajes (no hay endpoint bajo-cero para esto todavía) ──────────────────
+  // Se mantiene en memoria mientras el backend no lo exponga.
+
+  addMessage(msg: Omit<ContactMessage, 'id' | 'date' | 'read'>) {
+    const m: ContactMessage = {
+      ...msg,
+      id:   'm' + Date.now(),
+      date: new Date().toISOString(),
+      read: false,
+    };
+    this._messages.update(ms => [m, ...ms]);
+  }
+
+  markRead(id: string) {
+    this._messages.update(ms => ms.map(m => m.id === id ? { ...m, read: true } : m));
+  }
+
+  deleteMessage(id: string) {
+    this._messages.update(ms => ms.filter(m => m.id !== id));
+  }
+
+  // Fallback para el panel admin (restablecer defaults locales)
+  resetToDefaults() {
+    this._hero.set(DEFAULT_HERO);
+    this.loadAll();
+  }
 }

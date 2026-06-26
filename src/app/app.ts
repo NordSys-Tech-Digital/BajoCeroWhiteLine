@@ -1,13 +1,19 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { AuthService } from './services/auth';
+import { SiteDataService } from './services/site-data';
 
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet],
-  template: `<router-outlet></router-outlet>`
+  template: `<router-outlet></router-outlet>`,
 })
 export class App implements OnInit {
-  constructor(private auth: AuthService) {}
-  ngOnInit() { this.auth.checkSession(); }
+  private auth     = inject(AuthService);
+  private siteData = inject(SiteDataService);
+
+  ngOnInit() {
+    this.auth.checkSession();
+    this.siteData.loadAll();
+  }
 }

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { SiteDataService } from '../../services/site-data';
 
@@ -6,22 +6,14 @@ import { SiteDataService } from '../../services/site-data';
 	selector: 'app-admin-contact',
 	imports: [ReactiveFormsModule],
 	templateUrl: './admin-contact.html',
-	styleUrl: './admin-contact.scss'
+	styleUrl: './admin-contact.scss',
 })
 export class AdminContactComponent implements OnInit {
 	private siteData = inject(SiteDataService);
 	private fb = inject(FormBuilder);
-	saved = false;
 
-	private LABELS_KEY = 'cryotech_contact_labels';
-
-	labels = {
-		whatsapp: 'WhatsApp (solo números, sin +)',
-		phone: 'Teléfono fijo',
-		email: 'Correo electrónico',
-		city: 'Ciudad',
-		schedule: 'Horario de atención',
-	};
+	saved = signal(false);
+	saving = signal(false);
 
 	form = this.fb.group({
 		whatsapp: ['', Validators.required],
@@ -33,38 +25,19 @@ export class AdminContactComponent implements OnInit {
 
 	ngOnInit() {
 		this.form.patchValue(this.siteData.data().contact);
-		this.loadLabels();
-	}
-
-	loadLabels() {
-		const saved = localStorage.getItem(this.LABELS_KEY);
-		if (saved) {
-			try {
-				this.labels = { ...this.labels, ...JSON.parse(saved) };
-			} catch { }
-		}
-	}
-
-	updateLabel(field:
-		'whatsapp' |
-		'phone' |
-		'email' |
-		'city' |
-		'schedule'
-		, value: string) {
-		this.labels[field] = value;
-		this.saveLabels();
-	}
-
-	saveLabels() {
-		localStorage.setItem(this.LABELS_KEY, JSON.stringify(this.labels));
 	}
 
 	save() {
 		if (this.form.invalid) { this.form.markAllAsTouched(); return; }
-		this.siteData.updateContact(this.form.value as any);
-		this.saveLabels();
-		this.saved = true;
-		setTimeout(() => this.saved = false, 2500);
+		this.saving.set(true);
+
+		this.siteData.updateContact(this.form.value as any).subscribe({
+			next: () => {
+				this.saving.set(false);
+				this.saved.set(true);
+				setTimeout(() => this.saved.set(false), 2500);
+			},
+			error: () => this.saving.set(false),
+		});
 	}
 }
