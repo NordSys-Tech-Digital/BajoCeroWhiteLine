@@ -1,4 +1,4 @@
 export const environment = {
-  production: false,
-  apiUrl: 'http://localhost:4000/api/v1/bajo-cero',
+	production: false,
+	apiUrl: 'https://api-nutriapp.fly.dev/api/v1/bajo-cero/',
 };
