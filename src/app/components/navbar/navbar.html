@@ -1,6 +1,7 @@
 <header [ngClass]="{ 'scrolled': scrolled() }">
 	<div class="container nav-inner">
 
+		<!-- Logo -->
 		<a class="logo" routerLink="/">
 			<div class="logo-icon">
 				<svg viewBox="0 0 32 32" fill="none">
@@ -12,38 +13,45 @@
 			<span class="logo-text">Cryo<strong>Tech</strong></span>
 		</a>
 
+		<!-- Desktop Nav -->
 		<nav class="nav-links">
 			@for (link of navLinks; track link.label) {
 			<a [routerLink]="link.routerLink" [fragment]="link.fragment ?? undefined" routerLinkActive="nav-active"
 				[routerLinkActiveOptions]="{ exact: link.routerLink === '/' && !link.fragment }"
-				(click)="navigate(link)">
+				(click)="navigate(link, $event)">
 				{{ link.label }}
 			</a>
 			}
 		</nav>
 
+		<!-- Desktop Actions -->
 		<div class="nav-actions">
 			<a routerLink="/admin" class="btn btn-outline admin-link">⚙️ Admin</a>
-			<a href="https://wa.me/573001234567" target="_blank" class="btn btn-outline">WhatsApp</a>
-			<a href="tel:+576011234567" class="btn btn-primary">Llamar ahora</a>
+			<a [href]="whatsappLink" target="_blank" rel="noopener noreferrer" class="btn btn-outline">
+				WhatsApp
+			</a>
+			<a [href]="phoneLink" class="btn btn-primary">
+				Llamar ahora
+			</a>
 		</div>
 
-		<button class="hamburger" (click)="toggleMenu()" [ngClass]="{ 'open': menuOpen() }">
+		<!-- Hamburger Button -->
+		<button class="hamburger" (click)="toggleMenu()" [ngClass]="{ 'open': menuOpen() }" aria-label="Abrir menú">
 			<span></span><span></span><span></span>
 		</button>
 	</div>
 
-	<!-- Mobile menu -->
+	<!-- Mobile Menu -->
 	<div class="mobile-menu" [ngClass]="{ 'open': menuOpen() }">
 		@for (link of navLinks; track link.label) {
-		<a [routerLink]="link.routerLink" [fragment]="link.fragment ?? undefined" (click)="navigate(link)">
+		<a [routerLink]="link.routerLink" [fragment]="link.fragment ?? undefined" (click)="navigate(link, $event)">
 			{{ link.label }}
 		</a>
 		}
 		<div class="mobile-actions">
 			<a routerLink="/admin" class="btn btn-outline">⚙️ Admin</a>
-			<a href="https://wa.me/573001234567" class="btn btn-outline">WhatsApp</a>
-			<a href="tel:+576011234567" class="btn btn-primary">Llamar ahora</a>
+			<a [href]="whatsappLink" target="_blank" rel="noopener noreferrer" class="btn btn-outline">WhatsApp</a>
+			<a [href]="phoneLink" class="btn btn-primary">Llamar ahora</a>
 		</div>
 	</div>
 </header>

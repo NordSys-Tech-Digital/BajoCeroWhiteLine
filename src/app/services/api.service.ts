@@ -14,7 +14,7 @@ import { Response } from '../models/api/response';
 	providedIn: 'root',
 })
 export class ApiService {
-	private apiUrl = environment.api;
+	private apiUrl = environment.apiUrl;
 	private readonly http = inject(HttpClient);
 
 	/**

@@ -1,41 +1,73 @@
 .admin-gallery-page {
-  padding: 2rem;
+	padding: 2rem;
 }
+
 .gallery-actions {
-  margin-bottom: 1rem;
+	margin-bottom: 1rem;
+	display: flex;
+	gap: 1rem;
+	align-items: center;
 }
+
 .gallery-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1rem;
 }
+
 .gallery-item {
-  border: 1px solid #eee;
-  padding: 0.5rem;
-  border-radius: 6px;
-  width: 160px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+	border: 1px solid #eee;
+	padding: 0.5rem;
+	border-radius: 6px;
+	width: 160px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	background: #fff;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
+
 .gallery-item img {
-  width: 100%;
-  height: 100px;
-  object-fit: cover;
-  border-radius: 4px;
+	width: 100%;
+	height: 100px;
+	object-fit: cover;
+	border-radius: 4px;
 }
+
 .item-info {
-  margin-top: 0.5rem;
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  align-items: center;
+	margin-top: 0.5rem;
+	display: flex;
+	justify-content: space-between;
+	width: 100%;
+	align-items: center;
+	gap: 0.5rem;
 }
+
+.img-title {
+	font-size: 0.85rem;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 70%;
+}
+
 .btn-sm {
-  font-size: 0.8rem;
-  padding: 0.2rem 0.5rem;
+	font-size: 0.75rem;
+	padding: 0.25rem 0.5rem;
 }
+
 .error {
-  color: red;
-  margin-top: 1rem;
+	color: #dc3545;
+	background-color: #f8d7da;
+	border: 1px solid #f5c6cb;
+	padding: 0.75rem;
+	border-radius: 4px;
+	margin-top: 1rem;
+}
+
+.loading-text,
+.empty-state {
+	color: #6c757d;
+	font-style: italic;
+	margin-top: 1rem;
 }

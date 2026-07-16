@@ -1,0 +1,30 @@
+<div class="admin-layout">
+
+	<aside class="sidebar">
+		<div class="sidebar-logo">
+			<div class="logo-icon-sm">❄️</div>
+			<span>CryoTech</span>
+		</div>
+
+		<nav class="sidebar-nav">
+			@for (tab of tabs; track tab.id) {
+			<a class="nav-item" [routerLink]="tab.id" routerLinkActive="active"
+				[routerLinkActiveOptions]="{ exact: false }">
+				<span class="nav-icon">{{ tab.icon }}</span>
+				<span class="nav-label">{{ tab.label }}</span>
+			</a>
+			}
+		</nav>
+
+		<div class="sidebar-footer">
+			<button class="side-btn" (click)="goToSite()">🌐 Ver sitio</button>
+		</div>
+	</aside>
+
+	<main class="admin-content">
+		<div class="tab-content">
+			<router-outlet></router-outlet>
+		</div>
+	</main>
+
+</div>

@@ -1,106 +1,94 @@
-
-<div class="carousel-header-text" style="text-align:center; margin: 1.5rem 0;">
-  <h2 style="font-size:2rem; font-weight:700; letter-spacing:-1px;">Mis servicios</h2>
+<div class="carousel-header-text">
+	<h2>Nuestros trabajos realizados</h2>
 </div>
-<section
-  class="carousel-wrapper"
-  [class.fullscreen]="isFullscreen()"
-  (mouseenter)="pauseAutoplay()"
-  (mouseleave)="resumeAutoplay()"
-  (touchstart)="onTouchStart($event)"
-  (touchend)="onTouchEnd($event)"
-  (mousedown)="onMouseDown($event)"
->
 
-  <!-- ── Main Stage ─────────────────────────────────────── -->
-  <div class="stage" #track>
+<section class="carousel-wrapper" [class.fullscreen]="isFullscreen()" (mouseenter)="pauseAutoplay()"
+	(mouseleave)="resumeAutoplay()" (touchstart)="onTouchStart($event)" (touchend)="onTouchEnd($event)"
+	(mousedown)="onMouseDown($event)">
+	@if (total() === 0) {
+	<div class="empty-state">No hay imágenes disponibles en la galería.</div>
+	} @else {
 
-    <!-- Slides -->
-    @for (slide of slides; track slide.src; let i = $index) {
-      <div [ngClass]="getSlideClass(i)">
-        <img
-          [src]="slide.src"
-          [alt]="slide.alt || ''"
-          loading="lazy"
-          draggable="false"
-        />
-        @if (showCaptions && slide.title) {
-          <div class="caption">
-            <span class="caption-title">{{ slide.title }}</span>
-            @if (slide.subtitle) {
-              <span class="caption-sub">{{ slide.subtitle }}</span>
-            }
-          </div>
-        }
-      </div>
-    }
+	<!-- ── Main Stage ─────────────────────────────────────── -->
+	<div class="stage">
+		@for (slide of slides(); track slide.alt; let i = $index) {
+		<div class="slide" [class.active]="i === current()" [class.is-prev]="i === prev()"
+			[class.is-next]="i === next()" [class.inactive]="i !== current() && i !== prev() && i !== next()">
 
-    <!-- Gradient overlays -->
-    <div class="overlay overlay-left"></div>
-    <div class="overlay overlay-right"></div>
+			<img [src]="slide.src" [alt]="slide.alt || ''" loading="lazy" draggable="false" />
 
-    <!-- ── Navigation Arrows ─────────────────────────────── -->
-    <button class="arrow arrow-left" (click)="goPrev()" aria-label="Anterior">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="15 18 9 12 15 6"/>
-      </svg>
-    </button>
+			@if (showCaptions && slide.title) {
+			<div class="caption">
+				<span class="caption-title">{{ slide.title }}</span>
+				@if (slide.subtitle) {
+				<span class="caption-sub">{{ slide.subtitle }}</span>
+				}
+			</div>
+			}
+		</div>
+		}
 
-    <button class="arrow arrow-right" (click)="goNext()" aria-label="Siguiente">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="9 18 15 12 9 6"/>
-      </svg>
-    </button>
+		<!-- Gradient overlays -->
+		<div class="overlay overlay-left"></div>
+		<div class="overlay overlay-right"></div>
 
-    <!-- ── Top bar: counter + fullscreen ─────────────────── -->
-    <div class="topbar">
-      <span class="counter">{{ current() + 1 }} / {{ total() }}</span>
-      <button class="topbar-btn" (click)="toggleFullscreen()" [title]="isFullscreen() ? 'Salir' : 'Pantalla completa'">
-        @if (!isFullscreen()) {
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/>
-          </svg>
-        } @else {
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <path d="M8 3v3a2 2 0 01-2 2H3m18 0h-3a2 2 0 01-2-2V3m0 18v-3a2 2 0 012-2h3M3 16h3a2 2 0 012 2v3"/>
-          </svg>
-        }
-      </button>
-    </div>
-  </div>
+		<!-- Navigation Arrows -->
+		<button class="arrow arrow-left" (click)="goPrev()" aria-label="Imagen anterior">
+			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+				stroke-linejoin="round">
+				<polyline points="15 18 9 12 15 6" />
+			</svg>
+		</button>
 
-  <!-- ── Progress bar ───────────────────────────────────── -->
-  <div class="progress-rail">
-    <div class="progress-fill" [ngStyle]="{ width: progress() + '%' }"></div>
-  </div>
+		<button class="arrow arrow-right" (click)="goNext()" aria-label="Imagen siguiente">
+			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+				stroke-linejoin="round">
+				<polyline points="9 18 15 12 9 6" />
+			</svg>
+		</button>
 
-  <!-- ── Dot indicators ─────────────────────────────────── -->
-  <div class="dots">
-    @for (slide of slides; track slide.src; let i = $index) {
-      <button
-        class="dot"
-        [class.active]="i === current()"
-        (click)="goTo(i)"
-        [attr.aria-label]="'Ir a imagen ' + (i + 1)"
-      ></button>
-    }
-  </div>
+		<!-- Top bar: counter + fullscreen -->
+		<div class="topbar">
+			<span class="counter">{{ current() + 1 }} / {{ total() }}</span>
+			<button class="topbar-btn" (click)="toggleFullscreen()"
+				[attr.aria-label]="isFullscreen() ? 'Salir de pantalla completa' : 'Ver en pantalla completa'">
+				@if (!isFullscreen()) {
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+					<path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3" />
+				</svg>
+				} @else {
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+					<path d="M8 3v3a2 2 0 01-2 2H3m18 0h-3a2 2 0 01-2-2V3m0 18v-3a2 2 0 012-2h3M3 16h3a2 2 0 012 2v3" />
+				</svg>
+				}
+			</button>
+		</div>
+	</div>
 
-  <!-- ── Thumbnail strip ────────────────────────────────── -->
-  @if (showThumbnails && slides.length > 1) {
-    <div class="thumbs">
-      @for (slide of slides; track slide.src; let i = $index) {
-        <button
-          class="thumb"
-          [class.active]="i === current()"
-          (click)="goTo(i)"
-          [attr.aria-label]="'Miniatura ' + (i + 1)"
-        >
-          <img [src]="slide.src" [alt]="slide.alt || ''" loading="lazy" draggable="false" />
-          <div class="thumb-overlay"></div>
-        </button>
-      }
-    </div>
-  }
+	<!-- Progress bar -->
+	<div class="progress-rail">
+		<div class="progress-fill" [style.width.%]="progress()"></div>
+	</div>
 
+	<!-- Dot indicators -->
+	<div class="dots">
+		@for (slide of slides(); track slide.alt; let i = $index) {
+		<button class="dot" [class.active]="i === current()" (click)="goTo(i)"
+			[attr.aria-label]="'Ir a imagen ' + (i + 1)"></button>
+		}
+	</div>
+
+	<!-- Thumbnail strip -->
+	@if (showThumbnails && total() > 1) {
+	<div class="thumbs">
+		@for (slide of slides(); track slide.alt; let i = $index) {
+		<button class="thumb" [class.active]="i === current()" (click)="goTo(i)"
+			[attr.aria-label]="'Miniatura ' + (i + 1)">
+			<img [src]="slide.src" [alt]="slide.alt || ''" loading="lazy" draggable="false" />
+			<div class="thumb-overlay"></div>
+		</button>
+		}
+	</div>
+	}
+	}
 </section>

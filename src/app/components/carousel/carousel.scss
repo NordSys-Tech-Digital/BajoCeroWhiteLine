@@ -8,11 +8,33 @@ $z-slide: 1;
 $z-overlay: 2;
 $z-ui: 10;
 
+// ── Header ────────────────────────────────────────────────────────────────
+.carousel-header-text {
+	text-align: center;
+	margin: 1.5rem 0;
+
+	h2 {
+		font-size: 2rem;
+		font-weight: 700;
+		letter-spacing: -1px;
+		color: var(--brand-dark);
+	}
+}
+
+.empty-state {
+	text-align: center;
+	padding: 40px;
+	color: var(--text-muted);
+	font-style: italic;
+	background: #f8f9fa;
+	border-radius: $radius;
+}
+
 // ── Wrapper ───────────────────────────────────────────────────────────────
 .carousel-wrapper {
 	width: 100%;
 	max-width: 1080px;
-	margin: 0 auto 0;
+	margin: 0 auto;
 	padding: 0 0 32px;
 	user-select: none;
 	-webkit-user-select: none;
@@ -36,6 +58,10 @@ $z-ui: 10;
 
 		.thumbs {
 			padding: 8px 16px;
+		}
+
+		.carousel-header-text {
+			display: none; // Ocultar título en modo fullscreen
 		}
 	}
 }
@@ -61,8 +87,7 @@ $z-ui: 10;
 	position: absolute;
 	inset: 0;
 	z-index: $z-slide;
-	transition: transform $trans-speed $trans-ease,
-		opacity $trans-speed $trans-ease;
+	transition: transform $trans-speed $trans-ease, opacity $trans-speed $trans-ease;
 
 	img {
 		width: 100%;
@@ -74,17 +99,14 @@ $z-ui: 10;
 		transition: transform ($trans-speed * 2) $trans-ease;
 	}
 
-	// States
 	&.active {
 		z-index: 3;
 		transform: translateX(0) scale(1);
 		opacity: 1;
 
 		img {
-			transform: scale(1.02);
+			transform: scale(1.02); // Ken Burns subtle zoom
 		}
-
-		// Ken Burns subtle zoom
 	}
 
 	&.is-prev {
@@ -264,7 +286,7 @@ $z-ui: 10;
 	height: 100%;
 	background: linear-gradient(90deg, #0A6EBD, #00D4FF);
 	border-radius: 0 2px 2px 0;
-	transition: width 0.05s linear;
+	// La transición se maneja vía [style.width.%] en el HTML
 }
 
 // ── Dot indicators ────────────────────────────────────────────────────────
@@ -380,6 +402,7 @@ $z-ui: 10;
 		display: none;
 	}
 
+	// En móvil se usa swipe
 	.caption .caption-title {
 		font-size: 15px;
 	}
@@ -400,4 +423,6 @@ $z-ui: 10;
 	.thumbs {
 		display: none;
 	}
+
+	// Ahorrar espacio en móviles pequeños
 }

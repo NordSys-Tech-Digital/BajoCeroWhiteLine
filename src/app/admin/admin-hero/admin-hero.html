@@ -1,4 +1,13 @@
 <div class="admin-form-page" [formGroup]="form">
+
+	@if (loading()) {
+	<div class="loading-state">Cargando información del Hero...</div>
+	}
+
+	@if (error()) {
+	<div class="error-banner">{{ error() }}</div>
+	}
+
 	<div class="form-section">
 		<h4>Texto del Hero</h4>
 		<div class="field-grid">
@@ -16,7 +25,8 @@
 			</div>
 			<div class="field full">
 				<label>Subtexto descriptivo</label>
-				<textarea formControlName="subtext" rows="3"></textarea>
+				<textarea formControlName="subtext" rows="3"
+					placeholder="Instalación, mantenimiento y reparación..."></textarea>
 			</div>
 		</div>
 	</div>
@@ -24,8 +34,9 @@
 	<div class="form-section">
 		<div class="section-head">
 			<h4>Estadísticas (tarjetas del hero)</h4>
-			<button type="button" class="add-btn" (click)="addStat()">+ Agregar</button>
+			<button type="button" class="add-btn" (click)="addStat()" [disabled]="loading()">+ Agregar</button>
 		</div>
+
 		<div class="stats-grid" formArrayName="stats">
 			@for (ctrl of statsArray.controls; track $index; let i = $index) {
 			<div class="stat-row" [formGroupName]="i">
@@ -37,14 +48,18 @@
 					<label>Etiqueta</label>
 					<input type="text" formControlName="label" placeholder="Clientes atendidos">
 				</div>
-				<button type="button" class="remove-btn" (click)="removeStat(i)">✕</button>
+				<button type="button" class="remove-btn" (click)="removeStat(i)" [disabled]="loading()">✕</button>
 			</div>
 			}
 		</div>
 	</div>
 
 	<div class="save-bar">
-		@if (saved()) { <span class="saved-msg">✅ Cambios guardados</span> }
-		<button class="btn btn-primary" (click)="save()">Guardar cambios</button>
+		@if (saved()) {
+		<span class="saved-msg">✅ Cambios guardados correctamente</span>
+		}
+		<button class="btn btn-primary" (click)="save()" [disabled]="saving() || loading()">
+			{{ saving() ? 'Guardando...' : 'Guardar cambios' }}
+		</button>
 	</div>
 </div>

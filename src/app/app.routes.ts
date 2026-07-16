@@ -7,7 +7,7 @@ export const routes: Routes = [
 	},
 	{
 		path: 'admin',
-		loadComponent: () => import('./admin/admin-shell/admin-shell').then(m => m.AdminShellComponent)
+		loadChildren: () => import('./admin/admin.routes').then(m => m.adminRoutes)
 	},
 	{
 		path: 'galeria',

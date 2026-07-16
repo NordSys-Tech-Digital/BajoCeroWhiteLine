@@ -1,6 +1,6 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { SiteDataService } from '../../services/site-data';
+import { ApiService } from '../../services/api.service';
 
 @Component({
 	selector: 'app-admin-contact',
@@ -9,11 +9,14 @@ import { SiteDataService } from '../../services/site-data';
 	styleUrl: './admin-contact.scss',
 })
 export class AdminContactComponent implements OnInit {
-	private siteData = inject(SiteDataService);
+	private api = inject(ApiService);
 	private fb = inject(FormBuilder);
 
 	saved = signal(false);
 	saving = signal(false);
+	loading = signal(false);
+
+	private contactId = '';
 
 	form = this.fb.group({
 		whatsapp: ['', Validators.required],
@@ -24,14 +27,23 @@ export class AdminContactComponent implements OnInit {
 	});
 
 	ngOnInit() {
-		this.form.patchValue(this.siteData.data().contact);
+		this.loading.set(true);
+		this.api.get<any>('contact').subscribe({
+			next: raw => {
+				const src = Array.isArray(raw) ? raw[0] : raw;
+				this.contactId = src?.id ?? '';
+				this.form.patchValue(src);
+				this.loading.set(false);
+			},
+			error: () => this.loading.set(false),
+		});
 	}
 
 	save() {
 		if (this.form.invalid) { this.form.markAllAsTouched(); return; }
 		this.saving.set(true);
 
-		this.siteData.updateContact(this.form.value as any).subscribe({
+		this.api.put(`contact/${this.contactId}`, this.form.value).subscribe({
 			next: () => {
 				this.saving.set(false);
 				this.saved.set(true);

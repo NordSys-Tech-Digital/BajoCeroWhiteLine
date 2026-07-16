@@ -1,0 +1,24 @@
+<div class="login-page">
+	<div class="login-card">
+		<div class="login-logo">
+			<div class="logo-icon">❄️</div>
+			<h1>CryoTech Admin</h1>
+		</div>
+		<p class="login-sub">Panel de administración</p>
+		<form [formGroup]="loginForm" (ngSubmit)="login()">
+			<div class="login-field">
+				<label>Usuario</label>
+				<input type="text" formControlName="user" placeholder="admin" autocomplete="username">
+			</div>
+			<div class="login-field">
+				<label>Contraseña</label>
+				<input type="password" formControlName="pass" placeholder="••••••••" autocomplete="current-password">
+			</div>
+			@if (loginError()) {
+			<div class="login-error">{{ loginError() }}</div>
+			}
+			<button type="submit" class="btn btn-primary login-btn">Ingresar</button>
+		</form>
+		<a href="/" class="back-link">← Volver al sitio</a>
+	</div>
+</div>

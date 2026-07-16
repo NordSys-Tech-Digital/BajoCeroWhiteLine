@@ -1,59 +1,130 @@
-<div class="admin-form-page" [formGroup]="form">
-	<div class="form-section">
-		<h4>Datos de contacto</h4>
-		<p class="hint">Estos datos aparecen en el navbar, sección CTA y footer del sitio.</p>
-		<div class="field-grid">
+<div class="admin-contact" [formGroup]="form">
+
+	@if (loading()) {
+	<div class="loading-state">Cargando datos de contacto...</div>
+	} @else {
+
+	<div class="form-card">
+		<div class="card-header">
+			<div class="card-icon">📞</div>
+			<div>
+				<h4>Datos de contacto</h4>
+				<p>Aparecen en el navbar, sección CTA y footer del sitio.</p>
+			</div>
+		</div>
+
+		<div class="fields">
+			<div class="field-row">
+				<div class="field">
+					<label>
+						<span class="label-icon">💬</span> WhatsApp
+					</label>
+					<div class="input-wrap">
+						<span class="prefix">+</span>
+						<input type="text" formControlName="whatsapp" placeholder="573001234567">
+					</div>
+					<span class="hint">Con código de país, sin el +</span>
+					@if (form.get('whatsapp')?.invalid && form.get('whatsapp')?.touched) {
+					<span class="error">Campo requerido</span>
+					}
+				</div>
+
+				<div class="field">
+					<label>
+						<span class="label-icon">📞</span> Teléfono fijo
+					</label>
+					<input type="text" formControlName="phone" placeholder="6011234567">
+					@if (form.get('phone')?.invalid && form.get('phone')?.touched) {
+					<span class="error">Campo requerido</span>
+					}
+				</div>
+			</div>
+
+			<div class="field-row">
+				<div class="field">
+					<label>
+						<span class="label-icon">✉️</span> Correo electrónico
+					</label>
+					<input type="email" formControlName="email" placeholder="info@empresa.co">
+					@if (form.get('email')?.invalid && form.get('email')?.touched) {
+					<span class="error">Correo inválido</span>
+					}
+				</div>
+
+				<div class="field">
+					<label>
+						<span class="label-icon">📍</span> Ciudad
+					</label>
+					<input type="text" formControlName="city" placeholder="Cali, Colombia">
+					@if (form.get('city')?.invalid && form.get('city')?.touched) {
+					<span class="error">Campo requerido</span>
+					}
+				</div>
+			</div>
+
 			<div class="field">
 				<label>
-					<input type="text" [value]="form.get('whatsapp')?.value" style="width: 120px; margin-right: 8px;" />
-					(clave: whatsapp)
-				</label>
-				<input type="text" formControlName="whatsapp" placeholder="573001234567">
-				<span class="field-hint">Ej: 573001234567 (código país + número)</span>
-			</div>
-			<div class="field">
-				<label>
-					<input type="text" [value]="form.get('phone')?.value" style="width: 120px; margin-right: 8px;" />
-					(clave: phone)
-				</label>
-				<input type="text" formControlName="phone" placeholder="6011234567">
-			</div>
-			<div class="field">
-				<label>
-					<input type="text" [value]="form.get('email')?.value" style="width: 120px; margin-right: 8px;" />
-					(clave: email)
-				</label>
-				<input type="email" formControlName="email" placeholder="info@empresa.co">
-			</div>
-			<div class="field">
-				<label>
-					<input type="text" [value]="form.get('city')?.value" style="width: 120px; margin-right: 8px;" />
-					(clave: city)
-				</label>
-				<input type="text" formControlName="city" placeholder="Cali, Colombia">
-			</div>
-			<div class="field full">
-				<label>
-					<input type="text" [value]="form.get('schedule')?.value" style="width: 120px; margin-right: 8px;" />
-					(clave: schedule)
+					<span class="label-icon">🕐</span> Horario de atención
 				</label>
 				<input type="text" formControlName="schedule" placeholder="Lun–Dom · 7am–9pm">
+				@if (form.get('schedule')?.invalid && form.get('schedule')?.touched) {
+				<span class="error">Campo requerido</span>
+				}
 			</div>
 		</div>
 	</div>
 
-	<div class="preview-section">
-		<h4>Vista previa</h4>
-		<div class="preview-chips">
-			<span>💬 wa.me/{{ form.get('whatsapp')?.value }}</span>
-			<span>📞 {{ form.get('phone')?.value }}</span>
-			<span>✉️ {{ form.get('email')?.value }}</span>
-			<span>📍 {{ form.get('city')?.value }}</span>
+	<div class="preview-card">
+		<p class="preview-label">Vista previa</p>
+		<div class="preview-list">
+			<div class="preview-item">
+				<span class="pi-icon">💬</span>
+				<div>
+					<span class="pi-key">WhatsApp</span>
+					<span class="pi-val">wa.me/{{ form.get('whatsapp')?.value || '—' }}</span>
+				</div>
+			</div>
+			<div class="preview-item">
+				<span class="pi-icon">📞</span>
+				<div>
+					<span class="pi-key">Teléfono</span>
+					<span class="pi-val">{{ form.get('phone')?.value || '—' }}</span>
+				</div>
+			</div>
+			<div class="preview-item">
+				<span class="pi-icon">✉️</span>
+				<div>
+					<span class="pi-key">Correo</span>
+					<span class="pi-val">{{ form.get('email')?.value || '—' }}</span>
+				</div>
+			</div>
+			<div class="preview-item">
+				<span class="pi-icon">📍</span>
+				<div>
+					<span class="pi-key">Ciudad</span>
+					<span class="pi-val">{{ form.get('city')?.value || '—' }}</span>
+				</div>
+			</div>
+			<div class="preview-item">
+				<span class="pi-icon">🕐</span>
+				<div>
+					<span class="pi-key">Horario</span>
+					<span class="pi-val">{{ form.get('schedule')?.value || '—' }}</span>
+				</div>
+			</div>
 		</div>
 	</div>
 
 	<div class="save-bar">
-		@if (saved()) { <span class="saved-msg">✅ Contacto actualizado</span> }
-		<button class="btn btn-primary" (click)="save()">Guardar cambios</button>
+		@if (saved()) {
+		<span class="saved-msg">✅ Cambios guardados</span>
+		}
+		<button class="btn-save" (click)="save()" [disabled]="saving()">
+			@if (saving()) { <span class="spinner"></span> Guardando... }
+			@else { Guardar cambios }
+		</button>
 	</div>
+
+	}
+
 </div>

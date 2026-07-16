@@ -1,235 +1,201 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, tap, catchError, of } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { Observable, tap, catchError, of, shareReplay } from 'rxjs';
 import {
-  Service,
-  ProcessStep,
-  HeroData,
-  ContactInfo,
-  SiteData,
-  ContactMessage,
+	Service,
+	ProcessStep,
+	HeroData,
+	ContactInfo,
+	SiteData,
+	ContactMessage,
 } from '../models/site.models';
+import { ApiService } from './api.service';
 
-const API = environment.apiUrl;
-
-// ── Mapeadores: normalizan los campos del backend al modelo del frontend ───────
-
+// ── Mapeadores ───────────────────────────────────────────────────────────────
 function toService(r: any): Service {
-  return {
-    id:     r.id     ?? r._id ?? String(Date.now()),
-    icon:   r.icon   ?? '🔧',
-    color:  r.color  ?? 'blue',
-    title:  r.title  ?? '',
-    desc:   r.desc   ?? '',
-    items:  Array.isArray(r.items) ? r.items : [],
-    active: r.active ?? true,
-  };
+	return {
+		id: r.id ?? r._id ?? String(Date.now()),
+		icon: r.icon ?? '🔧',
+		color: r.color ?? 'blue',
+		title: r.title ?? '',
+		desc: r.desc ?? '',
+		items: Array.isArray(r.items) ? r.items : [],
+		active: r.active ?? true,
+		createdAt: r.createdAt ? new Date(r.createdAt) : new Date(),
+		updatedAt: r.updatedAt ? new Date(r.updatedAt) : new Date(),
+	};
 }
 
 function toStep(r: any): ProcessStep {
-  return {
-    id:    r.id    ?? r._id ?? String(Date.now()),
-    num:   r.num   ?? '',
-    icon:  r.icon  ?? '📞',
-    title: r.title ?? '',
-    desc:  r.descripcion ?? r.desc ?? '',   // la API usa "descripcion"
-  };
+	return {
+		id: r.id ?? r._id ?? String(Date.now()),
+		num: r.num ?? '',
+		icon: r.icon ?? '📞',
+		title: r.title ?? '',
+		desc: r.descripcion ?? r.desc ?? '',
+	};
 }
 
 function stepToApi(s: Omit<ProcessStep, 'id'> | ProcessStep) {
-  return { num: s.num, icon: s.icon, title: s.title, descripcion: s.desc };
+	return { num: s.num, icon: s.icon, title: s.title, descripcion: s.desc };
 }
 
 function toContact(r: any): ContactInfo {
-  const src = Array.isArray(r) ? r[0] : r;
-  return {
-    whatsapp: src?.whatsapp ?? '',
-    phone:    src?.phone    ?? '',
-    email:    src?.email    ?? '',
-    city:     src?.city     ?? '',
-    schedule: src?.schedule ?? '',
-  };
+	const src = Array.isArray(r) ? r[0] : r;
+	return {
+		id: src?.id ?? src?._id ?? 'default-contact-id',
+		whatsapp: src?.whatsapp ?? '',
+		phone: src?.phone ?? '',
+		email: src?.email ?? '',
+		city: src?.city ?? '',
+		schedule: src?.schedule ?? '',
+	};
 }
 
-// ── Default hero (no hay endpoint todavía en la API) ─────────────────────────
+function toHero(r: any): HeroData {
+	const src = Array.isArray(r) ? r[0] : r;
+	return {
+		id: src?.id ?? src?._id ?? 'default-hero-id',
+		badge: src?.badge ?? '✦ Servicio técnico certificado',
+		headline: src?.headline ?? 'Especialistas en',
+		headlineHighlight: src?.headlineHighlight ?? 'aires acondicionados',
+		subtext: src?.subtext ?? 'Instalación, mantenimiento y reparación...',
+		stats: Array.isArray(src?.stats) ? src.stats : [],
+		active: src?.active ?? true,
+		createdAt: src?.createdAt ?? new Date().toISOString(),
+		updatedAt: src?.updatedAt ?? new Date().toISOString(),
+	};
+}
 
 const DEFAULT_HERO: HeroData = {
-  badge:             '✦ Servicio técnico certificado',
-  headline:          'Especialistas en',
-  headlineHighlight: 'aires acondicionados',
-  subtext:           'Instalación, mantenimiento y reparación de electrodomésticos para hogares y empresas. Técnicos certificados con respuesta en menos de 2 horas.',
-  stats: [
-    { value: '+500', label: 'Clientes atendidos' },
-    { value: '24/7', label: 'Disponibilidad' },
-    { value: '8+',   label: 'Años de experiencia' },
-    { value: '100%', label: 'Garantía de servicio' },
-  ],
+	id: 'fallback-id',
+	badge: '✦ Servicio técnico certificado',
+	headline: 'Especialistas en',
+	headlineHighlight: 'aires acondicionados',
+	subtext: 'Instalación, mantenimiento y reparación de electrodomésticos.',
+	stats: [
+		{ value: '+500', label: 'Clientes atendidos' },
+		{ value: '24/7', label: 'Disponibilidad' },
+	],
+	active: true,
+	createdAt: new Date().toISOString(),
+	updatedAt: new Date().toISOString(),
 };
 
-// ── Servicio principal ────────────────────────────────────────────────────────
+// ── Servicio Principal ───────────────────────────────────────────────────────
 
 @Injectable({ providedIn: 'root' })
 export class SiteDataService {
-  private http = inject(HttpClient);
+	private http = inject(ApiService);
 
-  // Estado reactivo
-  private _services = signal<Service[]>([]);
-  private _steps    = signal<ProcessStep[]>([]);
-  private _contact  = signal<ContactInfo>({ whatsapp: '', phone: '', email: '', city: '', schedule: '' });
-  private _hero     = signal<HeroData>(DEFAULT_HERO);
-  private _messages = signal<ContactMessage[]>([]);
+	// ✅ Bandera para evitar peticiones duplicadas
+	private _isLoaded = false;
 
-  // Lectura pública
-  readonly data = computed<SiteData>(() => ({
-    hero:     this._hero(),
-    services: this._services(),
-    steps:    this._steps(),
-    contact:  this._contact(),
-  }));
+	// Estado reactivo
+	private _services = signal<Service[]>([]);
+	private _steps = signal<ProcessStep[]>([]);
+	private _contact = signal<ContactInfo | null>(null);
+	private _hero = signal<HeroData>(DEFAULT_HERO);
+	private _messages = signal<ContactMessage[]>([]);
 
-  readonly activeServices  = computed(() => this._services().filter(s => s.active));
-  readonly messages        = this._messages.asReadonly();
-  readonly unreadCount     = computed(() => this._messages().filter(m => !m.read).length);
+	// Lectura pública
+	readonly data = computed<SiteData>(() => ({
+		hero: this._hero(),
+		steps: this._steps(),
+		contact: this._contact() ?? { whatsapp: '', phone: '', email: '', city: '', schedule: '', id: 'default-contact-id' },
+	}));
 
-  // ── Carga inicial ────────────────────────────────────────────────────────────
+	readonly services = this._services.asReadonly();
+	readonly messages = this._messages.asReadonly();
+	readonly unreadCount = computed(() => this._messages().filter(m => !m.read).length);
 
-  loadAll() {
-    this.loadServices();
-    this.loadSteps();
-    this.loadContact();
-  }
+	// ── Carga inicial ──────────────────────────────────────────────────────────
+	loadAll() {
+		// ✅ Si ya se cargó, no hace nada. Esto elimina las peticiones duplicadas al 100%.
+		if (this._isLoaded) return;
+		this._isLoaded = true;
 
-  // ── Servicios ────────────────────────────────────────────────────────────────
-  // GET  /bajo-cero/services
-  // POST /bajo-cero/services         body: { icon, color, title, desc, items[], active }
-  // PUT  /bajo-cero/services/:id     body: mismo
-  // PATCH /bajo-cero/services/:id/toggle
-  // DELETE /bajo-cero/services/:id
+		this.loadHero();
+		this.loadServices();
+		this.loadSteps();
+		this.loadContact();
+	}
 
-  loadServices() {
-    this.http.get<any[]>(`${API}/services`).pipe(
-      catchError(() => of([]))
-    ).subscribe(raw => this._services.set(raw.map(toService)));
-  }
+	// ── 1. Hero ────────────────────────────────────────────────────────────────
+	loadHero() {
+		this.http.get<any>(`hero`).pipe(
+			catchError(() => of(null))
+		).subscribe(raw => {
+			if (raw) this._hero.set(toHero(raw));
+		});
+	}
 
-  addService(s: Omit<Service, 'id'>): Observable<Service> {
-    return this.http.post<any>(`${API}/services`, s).pipe(
-      tap(raw => {
-        const created = toService(raw);
-        this._services.update(list => [...list, created]);
-      })
-    );
-  }
+	updateHero(hero: HeroData): Observable<any> {
+		return this.http.put(`hero/${hero.id}`, hero).pipe(
+			tap(() => this._hero.set(hero))
+		);
+	}
 
-  updateService(s: Service): Observable<Service> {
-    return this.http.put<any>(`${API}/services/${s.id}`, s).pipe(
-      tap(raw => {
-        const updated = toService({ ...s, ...raw });
-        this._services.update(list => list.map(x => x.id === s.id ? updated : x));
-      })
-    );
-  }
+	// ── 2. Services ────────────────────────────────────────────────────────────
+	loadServices() {
+		this.http.get<any[]>(`services`).pipe(
+			catchError(() => of([]))
+		).subscribe(raw => {
+			this._services.set(raw.map(toService));
+		});
+	}
 
-  toggleService(id: string): Observable<any> {
-    return this.http.patch<any>(`${API}/services/${id}/toggle`, {}).pipe(
-      tap(() => this._services.update(list =>
-        list.map(x => x.id === id ? { ...x, active: !x.active } : x)
-      ))
-    );
-  }
+	// ── 3. Process Steps ───────────────────────────────────────────────────────
+	loadSteps() {
+		this.http.get<any[]>(`process-steps`).pipe(
+			catchError(() => of([]))
+		).subscribe(raw => this._steps.set(raw.map(toStep)));
+	}
 
-  deleteService(id: string): Observable<any> {
-    return this.http.delete<any>(`${API}/services/${id}`).pipe(
-      tap(() => this._services.update(list => list.filter(x => x.id !== id)))
-    );
-  }
 
-  // ── Pasos del proceso ────────────────────────────────────────────────────────
-  // GET    /bajo-cero/process-steps
-  // POST   /bajo-cero/process-steps   body: { num, icon, title, descripcion }
-  // PUT    /bajo-cero/process-steps/:id
-  // DELETE /bajo-cero/process-steps/:id
+	deleteStep(id: string): Observable<any> {
+		return this.http.delete(`process-steps/${id}`).pipe(
+			tap(() => this._steps.update(list => list.filter(x => x.id !== id)))
+		);
+	}
 
-  loadSteps() {
-    this.http.get<any[]>(`${API}/process-steps`).pipe(
-      catchError(() => of([]))
-    ).subscribe(raw => this._steps.set(raw.map(toStep)));
-  }
+	// ── 4. Contact ─────────────────────────────────────────────────────────────
+	loadContact() {
+		this.http.get<any>(`contact`).pipe(
+			catchError(() => of(null))
+		).subscribe(raw => {
+			if (raw) this._contact.set(toContact(raw));
+		});
+	}
 
-  addStep(s: Omit<ProcessStep, 'id'>): Observable<ProcessStep> {
-    return this.http.post<any>(`${API}/process-steps`, stepToApi(s)).pipe(
-      tap(raw => {
-        const created = toStep({ ...stepToApi(s), ...raw });
-        this._steps.update(list => [...list, created]);
-      })
-    );
-  }
+	updateContact(c: ContactInfo): Observable<any> {
+		return this.http.put(`contact/${c.id}`, c).pipe(
+			tap(() => this._contact.set(c))
+		);
+	}
 
-  updateStep(s: ProcessStep): Observable<ProcessStep> {
-    return this.http.put<any>(`${API}/process-steps/${s.id}`, stepToApi(s)).pipe(
-      tap(raw => {
-        const updated = toStep({ ...stepToApi(s), ...raw, id: s.id });
-        this._steps.update(list => list.map(x => x.id === s.id ? updated : x));
-      })
-    );
-  }
+	// ── 5. Messages ────────────────────────────────────────────────────────────
+	addMessage(msg: Omit<ContactMessage, 'id' | 'date' | 'read'>) {
+		const m: ContactMessage = {
+			...msg,
+			id: 'm' + Date.now(),
+			date: new Date().toISOString(),
+			read: false,
+		};
+		this._messages.update(ms => [m, ...ms]);
+	}
 
-  deleteStep(id: string): Observable<any> {
-    return this.http.delete<any>(`${API}/process-steps/${id}`).pipe(
-      tap(() => this._steps.update(list => list.filter(x => x.id !== id)))
-    );
-  }
+	// ✅ Función reparada (estaba rota por el copy-paste)
+	markRead(id: string) {
+		this._messages.update(ms => ms.map(m => m.id === id ? { ...m, read: true } : m));
+	}
 
-  // ── Contacto ─────────────────────────────────────────────────────────────────
-  // GET /bajo-cero/contact
-  // PUT /bajo-cero/contact/    (barra al final tal como está en el Postman)
+	deleteMessage(id: string) {
+		this._messages.update(ms => ms.filter(m => m.id !== id));
+	}
 
-  loadContact() {
-    this.http.get<any>(`${API}/contact`).pipe(
-      catchError(() => of(null))
-    ).subscribe(raw => {
-      if (raw) this._contact.set(toContact(raw));
-    });
-  }
-
-  updateContact(c: ContactInfo): Observable<any> {
-    return this.http.put<any>(`${API}/contact/`, c).pipe(
-      tap(() => this._contact.set(c))
-    );
-  }
-
-  // ── Hero ─────────────────────────────────────────────────────────────────────
-  // No hay endpoint en la API todavía → se guarda en memoria.
-
-  updateHero(hero: HeroData) {
-    this._hero.set(hero);
-  }
-
-  // ── Mensajes (no hay endpoint bajo-cero para esto todavía) ──────────────────
-  // Se mantiene en memoria mientras el backend no lo exponga.
-
-  addMessage(msg: Omit<ContactMessage, 'id' | 'date' | 'read'>) {
-    const m: ContactMessage = {
-      ...msg,
-      id:   'm' + Date.now(),
-      date: new Date().toISOString(),
-      read: false,
-    };
-    this._messages.update(ms => [m, ...ms]);
-  }
-
-  markRead(id: string) {
-    this._messages.update(ms => ms.map(m => m.id === id ? { ...m, read: true } : m));
-  }
-
-  deleteMessage(id: string) {
-    this._messages.update(ms => ms.filter(m => m.id !== id));
-  }
-
-  // Fallback para el panel admin (restablecer defaults locales)
-  resetToDefaults() {
-    this._hero.set(DEFAULT_HERO);
-    this.loadAll();
-  }
+	resetToDefaults() {
+		this._hero.set(DEFAULT_HERO);
+		this._isLoaded = false; // Permitir recarga si se resetea
+		this.loadAll();
+	}
 }

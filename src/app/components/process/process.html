@@ -1,27 +1,34 @@
 <section class="process-section" id="proceso">
-  <div class="container">
-    <div class="section-header">
-      <span class="section-tag">✦ ¿Cómo funciona?</span>
-      <h2>Simple, rápido<br>y <span>sin complicaciones</span></h2>
-    </div>
-    <div class="steps-grid">
-      @for (step of steps; track step.id) {
-        <div class="step-card">
-          <div class="step-num">{{ step.num }}</div>
-          <div class="step-icon">{{ step.icon }}</div>
-          <h4>{{ step.title }}</h4>
-          <p>{{ step.desc }}</p>
-        </div>
-      }
-    </div>
-    <div class="process-footer">
-      <div class="guarantee-badge">
-        <div class="guar-icon">🛡️</div>
-        <div>
-          <strong>Garantía en todos nuestros servicios</strong>
-          <span>Respaldamos cada trabajo con garantía escrita de 3 a 6 meses según el servicio</span>
-        </div>
-      </div>
-    </div>
-  </div>
+	<div class="container">
+		<div class="section-header">
+			<span class="section-tag">✦ ¿Cómo funciona?</span>
+			<h2>Simple, rápido<br>y <span>sin complicaciones</span></h2>
+		</div>
+
+		<!-- ✅ Estado de carga / vacío manejado elegantemente -->
+		@if (steps().length > 0) {
+		<div class="steps-grid">
+			@for (step of steps(); track step.id) {
+			<div class="step-card">
+				<div class="step-num">{{ step.num }}</div>
+				<div class="step-icon">{{ step.icon }}</div>
+				<h4>{{ step.title }}</h4>
+				<p>{{ step.desc }}</p>
+			</div>
+			}
+		</div>
+		} @else {
+		<div class="loading-state">Cargando pasos del proceso...</div>
+		}
+
+		<div class="process-footer">
+			<div class="guarantee-badge">
+				<div class="guar-icon">🛡️</div>
+				<div>
+					<strong>Garantía en todos nuestros servicios</strong>
+					<span>Respaldamos cada trabajo con garantía escrita de 3 a 6 meses según el servicio</span>
+				</div>
+			</div>
+		</div>
+	</div>
 </section>
